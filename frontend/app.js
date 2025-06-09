@@ -4,8 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function fetchCategories() {
+  const token = localStorage.getItem('token');
   try {
-    const response = await fetch('https://helecashfinal.onrender.com/api/categorias');
+    const response = await fetch('https://helecashfinal.onrender.com/api/categorias', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
     const categories = await response.json();
 
     const select = document.getElementById('category');
@@ -20,6 +26,7 @@ async function fetchCategories() {
     console.error('Erro ao carregar categorias:', error);
   }
 };
+
 
 const form = document.getElementById('transaction-form');
 
@@ -62,7 +69,9 @@ form.addEventListener('submit', async (e) => {
 
 async function fetchTransactions() {
   try {
-    const response = await fetch('https://helecashfinal.onrender.com/api/auth/login', {
+    const token = localStorage.getItem('token');
+    
+    const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
       headers: {
       'Authorization': `Bearer ${token}`
       }
