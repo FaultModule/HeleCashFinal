@@ -68,46 +68,41 @@ async function fetchDashboardData(token) {
 }
 
 
-function renderPizzaCharts(despesasPorMes) {
-  despesasPorMes.forEach((dados, index) => {
-    const ctx = document.getElementById(`pizzaChart${index + 1}`).getContext('2d');
+function renderPizzaCharts(mensais) {
+  const cores = ['#10b981', '#ef4444'];
 
-    const labels = Object.keys(dados);
-    const valores = Object.values(dados);
-    const cores = labels.map(() => `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`);
-    console.log('Renderizando gráfico de pizza', dados, `#pizzaChart${index + 1}`);
+  mensais.forEach((mes, index) => {
+    const canvasId = `barChart${index + 1}`;
+    const labelId = `barLabel${index + 1}`;
+    const canvas = document.getElementById(canvasId);
+    const labelEl = document.getElementById(labelId);
+
+    if (!canvas || !labelEl) return;
+
+    // Define o texto do título acima do gráfico
+    labelEl.textContent = `Receitas vs Despesas - ${mes.label}`;
+
+    const ctx = canvas.getContext('2d');
 
     new Chart(ctx, {
-      type: 'doughnut',
+      type: 'bar',
       data: {
-        labels,
+        labels: ['Receitas', 'Despesas'],
         datasets: [{
-          data: valores,
+          label: mes.label,
+          data: [mes.receitas, mes.despesas],
           backgroundColor: cores
         }]
       },
       options: {
-
+        responsive: true,
         plugins: {
-          title: {
-
-            display: false
-          },
-          tooltip: {
-            callbacks: {
-              label: (context) => {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                return `${label}: R$ ${value.toFixed(2)}`;
-              }
-            }
-          },
-          legend: {
-            position: 'bottom'
-          }
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
         }
       }
     });
   });
 }
-
