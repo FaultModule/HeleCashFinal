@@ -35,7 +35,7 @@ async function fetchDashboardData(token) {
         despesas: 0
       };
     });
-
+    const despesasPorCategoriaMes = [ {}, {}, {} ];
     data.forEach(item => {
       const dataLanc = new Date(item.data);
       const valor = Number(item.valor);
@@ -46,76 +46,61 @@ async function fetchDashboardData(token) {
       if (tipo === 'despesa') totalDespesas += valor;
 
       
-      meses.forEach(m => {
-        if (dataLanc.getFullYear() === m.ano && dataLanc.getMonth() === m.mes) {
-          if (tipo === 'receita') m.receitas += valor;
-          if (tipo === 'despesa') m.despesas += valor;
-        }
-      });
+      meses.forEach((m, i) => {
+      if (dataLanc.getFullYear() === m.ano && dataLanc.getMonth() === m.mes) {
+      const categoria = item.categoria_nome;
+      despesasPorCategoriaMes[i][categoria] = (despesasPorCategoriaMes[i][categoria] || 0) + valor;
+      }
+    });
     });
 
     document.getElementById('total-saldo').textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
     document.getElementById('total-receitas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
     document.getElementById('total-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
 
-    renderChartMensal(meses.reverse()); 
+    renderChartMensal(meses.reverse());
+    renderPizzaCharts(despesasPorCategoriaMes.reverse());
   } catch (error) {
     console.error('Erro ao carregar dados do dashboard:', error);
   }
 }
 
 
-function renderChartMensal(mensais) {
-  const cores = ['#3b82f6', '#ef4444']; // azul e vermelho
+function renderPizzaCharts(despesasPorMes) {
+  despesasPorMes.forEach((dados, index) => {
+    const ctx = document.getElementById(`pizzaChart${index + 1}`).getContext('2d');
 
-  mensais.forEach((mes, index) => {
-    const ctx = document.getElementById(`chart${index + 1}`).getContext('2d');
+    const labels = Object.keys(dados);
+    const valores = Object.values(dados);
+    const cores = labels.map(() => `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`);
 
     new Chart(ctx, {
-      type: 'bar',
+      type: 'doughnut',
       data: {
-        labels: ['Receitas', 'Despesas'],
+        labels,
         datasets: [{
-          label: `Valores - ${mes.label}`,
-          data: [mes.receitas, mes.despesas],
-          backgroundColor: cores,
-          borderRadius: 6,
-          borderSkipped: false
+          data: valores,
+          backgroundColor: cores
         }]
       },
       options: {
-        responsive: true,
-        indexAxis: 'y', // barras horizontais
+
         plugins: {
           title: {
-            display: true,
-            text: `Movimentação em ${mes.label}`,
-            font: {
-              size: 16
-            }
-          },
-          legend: {
+
             display: false
           },
           tooltip: {
             callbacks: {
-              label: context => `R$ ${context.raw.toFixed(2)}`
-            }
-          }
-        },
-        scales: {
-          x: {
-            beginAtZero: true,
-            ticks: {
-              callback: value => `R$ ${value}`
-            }
-          },
-          y: {
-            ticks: {
-              font: {
-                weight: 'bold'
+              label: (context) => {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                return `${label}: R$ ${value.toFixed(2)}`;
               }
             }
+          },
+          legend: {
+            position: 'bottom'
           }
         }
       }
