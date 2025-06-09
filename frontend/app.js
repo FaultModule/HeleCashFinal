@@ -62,7 +62,7 @@ form.addEventListener('submit', async (e) => {
 
 async function fetchTransactions() {
   try {
-    const response = await fetch('http://localhost:3000/api/lancamentos', {
+    const response = await fetch('https://helecashfinal.onrender.com/api/auth/login', {
       headers: {
       'Authorization': `Bearer ${token}`
       }
