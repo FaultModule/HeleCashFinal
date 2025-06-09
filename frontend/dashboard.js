@@ -66,27 +66,57 @@ async function fetchDashboardData(token) {
 
 
 function renderChartMensal(mensais) {
-  const cores = ['#10b981', '#ef4444'];
+  const cores = ['#3b82f6', '#ef4444']; // azul e vermelho
 
   mensais.forEach((mes, index) => {
     const ctx = document.getElementById(`chart${index + 1}`).getContext('2d');
+
     new Chart(ctx, {
       type: 'bar',
       data: {
         labels: ['Receitas', 'Despesas'],
         datasets: [{
-          label: mes.label,
+          label: `Valores - ${mes.label}`,
           data: [mes.receitas, mes.despesas],
-          backgroundColor: cores
+          backgroundColor: cores,
+          borderRadius: 6,
+          borderSkipped: false
         }]
       },
       options: {
         responsive: true,
+        indexAxis: 'y', // barras horizontais
         plugins: {
-          legend: { display: false }
+          title: {
+            display: true,
+            text: `Movimentação em ${mes.label}`,
+            font: {
+              size: 16
+            }
+          },
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: context => `R$ ${context.raw.toFixed(2)}`
+            }
+          }
         },
         scales: {
-          y: { beginAtZero: true }
+          x: {
+            beginAtZero: true,
+            ticks: {
+              callback: value => `R$ ${value}`
+            }
+          },
+          y: {
+            ticks: {
+              font: {
+                weight: 'bold'
+              }
+            }
+          }
         }
       }
     });
