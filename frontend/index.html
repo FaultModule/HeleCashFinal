@@ -4,19 +4,20 @@
   <meta charset="UTF-8" />
   <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-6">
+
+  <div class="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-6">
+    
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard HeleCash</h1>
       <button id="logout-btn" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <!-- SALDOS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
       <div class="bg-green-100 text-green-800 p-4 rounded shadow">
         <h2 class="text-lg font-semibold">Saldo Total</h2>
         <p id="total-saldo" class="text-2xl font-bold">R$ 0.00</p>
@@ -31,10 +32,8 @@
       </div>
     </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-
-    <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- GRÁFICOS DE PIZZA -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div>
         <h3 class="text-center font-semibold mb-2">Despesas - Mês Atual</h3>
         <canvas id="pizzaChart1" height="100"></canvas>
@@ -47,10 +46,9 @@
         <h3 class="text-center font-semibold mb-2">Despesas - Há 2 Meses</h3>
         <canvas id="pizzaChart3" height="100"></canvas>
       </div>
-      </div>
-  </div>
+    </div>
 
-</div>
+  </div>
 
   <script src="dashboard.js"></script>
 </body>
