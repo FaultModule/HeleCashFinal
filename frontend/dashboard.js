@@ -47,10 +47,12 @@ async function fetchDashboardData(token) {
 
       
       meses.forEach((m, i) => {
-      if (dataLanc.getFullYear() === m.ano && dataLanc.getMonth() === m.mes) {
+    if (dataLanc.getFullYear() === m.ano && dataLanc.getMonth() === m.mes) {
       const categoria = item.categoria_nome;
+      if (tipo === 'despesa') {
       despesasPorCategoriaMes[i][categoria] = (despesasPorCategoriaMes[i][categoria] || 0) + valor;
       }
+    }
     });
     });
 
@@ -58,8 +60,8 @@ async function fetchDashboardData(token) {
     document.getElementById('total-receitas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
     document.getElementById('total-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
 
-    renderChartMensal(meses.reverse());
-    renderPizzaCharts(despesasPorCategoriaMes.reverse());
+    renderChartMensal(meses);
+    renderPizzaCharts(despesasPorCategoriaMes);
   } catch (error) {
     console.error('Erro ao carregar dados do dashboard:', error);
   }
