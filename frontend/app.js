@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function fetchCategories() {
   try {
-    const response = await fetch('http://localhost:3000/api/categorias');
+    const response = await fetch('https://helecashfinal.onrender.com/api/categorias');
     const categories = await response.json();
 
     const select = document.getElementById('category');
@@ -35,7 +35,7 @@ form.addEventListener('submit', async (e) => {
   const userId = 1;
 
   try {
-    const response = await fetch('http://localhost:3000/api/lancamentos', {
+    const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
