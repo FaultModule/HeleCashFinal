@@ -68,7 +68,7 @@ async function fetchDashboardData(token) {
 }
 
 
-function renderPizzaCharts(mensais) {
+function renderChartMensal(mensais) {
   const cores = ['#10b981', '#ef4444'];
 
   mensais.forEach((mes, index) => {
@@ -79,7 +79,6 @@ function renderPizzaCharts(mensais) {
 
     if (!canvas || !labelEl) return;
 
-    // Define o texto do título acima do gráfico
     labelEl.textContent = `Receitas vs Despesas - ${mes.label}`;
 
     const ctx = canvas.getContext('2d');
@@ -101,6 +100,45 @@ function renderPizzaCharts(mensais) {
         },
         scales: {
           y: { beginAtZero: true }
+        }
+      }
+    });
+  });
+}
+function renderPizzaCharts(despesasPorMes) {
+  despesasPorMes.forEach((dados, index) => {
+    const ctx = document.getElementById(`pizzaChart${index + 1}`).getContext('2d');
+
+    const labels = Object.keys(dados);
+    const valores = Object.values(dados);
+    const cores = labels.map(() => `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`);
+
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: valores,
+          backgroundColor: cores
+        }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.label || '';
+                const value = context.raw || 0;
+                return `${label}: R$ ${value.toFixed(2)}`;
+              }
+            }
+          },
+          legend: {
+            position: 'bottom'
+          }
         }
       }
     });
