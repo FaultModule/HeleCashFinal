@@ -60,7 +60,7 @@ async function fetchDashboardData(token) {
     document.getElementById('total-receitas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
     document.getElementById('total-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
 
-    renderChartMensal(meses);
+    
     renderPizzaCharts(despesasPorCategoriaMes);
   } catch (error) {
     console.error('Erro ao carregar dados do dashboard:', error);
