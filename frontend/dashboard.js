@@ -62,7 +62,7 @@ async function fetchDashboardData(token) {
 
     
     renderChartMensal(meses); // Gráfico de barras
-    renderPizzaCharts(despesasPorCategoriaMes); // Gráfico de pizza
+    renderPizzaCharts(despesasPorCategoriaMes, meses); // Gráfico de pizza
   } catch (error) {
     console.error('Erro ao carregar dados do dashboard:', error);
   }
@@ -106,13 +106,18 @@ function renderChartMensal(mensais) {
     });
   });
 }
-function renderPizzaCharts(despesasPorMes) {
+function renderPizzaCharts(despesasPorMes, meses) {
   despesasPorMes.forEach((dados, index) => {
     const ctx = document.getElementById(`pizzaChart${index + 1}`).getContext('2d');
+    const labelEl = document.getElementById(`pizzaLabel${index + 1}`);
 
     const labels = Object.keys(dados);
     const valores = Object.values(dados);
     const cores = labels.map(() => `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`);
+
+    if (labelEl) {
+      labelEl.textContent = `Despesas por Categoria - ${meses[index].label}`;
+    }
 
     new Chart(ctx, {
       type: 'doughnut',
@@ -125,9 +130,7 @@ function renderPizzaCharts(despesasPorMes) {
       },
       options: {
         plugins: {
-          title: {
-            display: false
-          },
+          title: { display: false },
           tooltip: {
             callbacks: {
               label: (context) => {
