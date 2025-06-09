@@ -14,9 +14,9 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     const data = await response.json();
 
     if (response.ok) {
-      // Salva o token no localStorage
+      
       localStorage.setItem('token', data.token);
-      // Redireciona para a página principal
+      
       window.location.href = 'index.html';
     } else {
       document.getElementById('error').textContent = data.error;

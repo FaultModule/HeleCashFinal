@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+   const token = localStorage.getItem('token');
+    if (!token) {
+    window.location.href = 'login.html';
+    return;
+  }
+
   fetchCategories();
   fetchTransactions();
 });
@@ -89,7 +95,7 @@ async function fetchTransactions() {
     const data = await response.json();
 
     const list = document.getElementById('transaction-list');
-    list.innerHTML = ''; // limpa a lista atual
+    list.innerHTML = ''; 
 
     let saldo = 0;
 
@@ -98,7 +104,7 @@ async function fetchTransactions() {
       li.textContent = `${item.data.split('T')[0]} - ${item.descricao} - R$ ${Number(item.valor).toFixed(2)} [${item.categoria_nome}]`;
 
 
-      // Atualiza saldo
+      
       if (item.categoria_tipo === 'receita') {
         saldo += Number(item.valor);
       } else if (item.categoria_tipo === 'despesa') {
@@ -108,10 +114,18 @@ async function fetchTransactions() {
       list.appendChild(li);
     });
 
-    // Atualiza o saldo na tela
+    
     document.getElementById('balance').textContent = saldo.toFixed(2);
 
   } catch (error) {
     console.error('Erro ao carregar lançamentos:', error);
   }
-}
+};
+
+  const logoutBtn = document.getElementById('logout-btn');
+
+  logoutBtn.addEventListener('click', () => {
+  localStorage.removeItem('token');
+  window.location.href = 'login.html';
+});
+

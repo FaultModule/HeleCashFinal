@@ -7,7 +7,6 @@
 <body>
   <h1>HeleCash</h1>
 
-  <!-- Formulário para novo lançamento -->
   <form id="transaction-form">
     <input type="text" id="description" placeholder="Descrição" required>
     <input type="number" id="amount" placeholder="Valor" required>
@@ -15,16 +14,18 @@
 
     <select id="category" required>
       <option value="">Selecione uma categoria</option>
-      <!-- Opções virão do back-end -->
+      
     </select>
 
     <button type="submit">Adicionar</button>
+    <button id="logout-btn">Sair</button>
+
   </form>
 
-  <!-- Exibição do saldo -->
+  
   <h2>Saldo: R$ <span id="balance">0.00</span></h2>
 
-  <!-- Lista de lançamentos -->
+  
   <ul id="transaction-list"></ul>
 
   <script src="app.js"></script>
@@ -32,7 +33,7 @@
     <script>
       const token = localStorage.getItem('token');
       if (!token) {
-        // Se não tiver token, volta para login
+        
         window.location.href = 'login.html';
       }
     </script>
