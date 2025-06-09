@@ -3,6 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchTransactions();
 });
 
+  function parseJwt(token) {
+  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  const decoded = JSON.parse(atob(base64));
+  return decoded;
+}
+
 async function fetchCategories() {
   const token = localStorage.getItem('token');
   try {
@@ -31,20 +37,24 @@ async function fetchCategories() {
 const form = document.getElementById('transaction-form');
 
 form.addEventListener('submit', async (e) => {
-  e.preventDefault(); // impede o reload da página
+  e.preventDefault();
+
+  const token = localStorage.getItem('token');
+  const payload = parseJwt(token);
+  const userId = payload.id;
 
   const description = document.getElementById('description').value;
   const amount = parseFloat(document.getElementById('amount').value);
   const date = document.getElementById('date').value;
   const categoryId = parseInt(document.getElementById('category').value);
 
-  // Substitua com o ID do usuário real se quiser usar login depois
-  const userId = 1;
-
-  try {
+    try {
     const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({
         descricao: description,
         valor: amount,
@@ -57,11 +67,10 @@ form.addEventListener('submit', async (e) => {
     const result = await response.json();
     alert(result.message || 'Lançamento adicionado com sucesso!');
 
-    form.reset(); // limpa os campos
+    form.reset();
     fetchTransactions();
 
-    // AQUI você poderá chamar a função para atualizar a lista e o saldo
-  } catch (error) {
+  }  catch (error) {
     console.error('Erro ao adicionar lançamento:', error);
     alert('Erro ao adicionar lançamento');
   }
