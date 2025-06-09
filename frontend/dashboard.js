@@ -16,9 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchDashboardData(token) {
   try {
     const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
 
     const data = await response.json();
@@ -26,46 +24,72 @@ async function fetchDashboardData(token) {
     let totalReceitas = 0;
     let totalDespesas = 0;
 
-    data.forEach(item => {
-      const valor = Number(item.valor);
-      if (item.categoria_tipo === 'receita') {
-        totalReceitas += valor;
-      } else if (item.categoria_tipo === 'despesa') {
-        totalDespesas += valor;
-      }
+    const hoje = new Date();
+    const meses = [0, 1, 2].map(i => {
+      const ref = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      return {
+        label: ref.toLocaleDateString('pt-BR', { month: 'long' }),
+        ano: ref.getFullYear(),
+        mes: ref.getMonth(),
+        receitas: 0,
+        despesas: 0
+      };
     });
 
-    const saldoTotal = totalReceitas - totalDespesas;
+    data.forEach(item => {
+      const dataLanc = new Date(item.data);
+      const valor = Number(item.valor);
+      const tipo = item.categoria_tipo;
 
-    document.getElementById('total-saldo').textContent = `R$ ${saldoTotal.toFixed(2)}`;
+      
+      if (tipo === 'receita') totalReceitas += valor;
+      if (tipo === 'despesa') totalDespesas += valor;
+
+      
+      meses.forEach(m => {
+        if (dataLanc.getFullYear() === m.ano && dataLanc.getMonth() === m.mes) {
+          if (tipo === 'receita') m.receitas += valor;
+          if (tipo === 'despesa') m.despesas += valor;
+        }
+      });
+    });
+
+    document.getElementById('total-saldo').textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
     document.getElementById('total-receitas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
     document.getElementById('total-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
 
-    renderChart(totalReceitas, totalDespesas);
+    renderChartMensal(meses.reverse()); 
   } catch (error) {
     console.error('Erro ao carregar dados do dashboard:', error);
   }
 }
 
-function renderChart(receitas, despesas) {
-  const ctx = document.getElementById('chart').getContext('2d');
-  new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Receitas', 'Despesas'],
-      datasets: [{
-        label: 'Distribuição',
-        data: [receitas, despesas],
-        backgroundColor: ['#3b82f6', '#ef4444']
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom'
+
+function renderChartMensal(mensais) {
+  const cores = ['#10b981', '#ef4444'];
+
+  mensais.forEach((mes, index) => {
+    const ctx = document.getElementById(`chart${index + 1}`).getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Receitas', 'Despesas'],
+        datasets: [{
+          label: mes.label,
+          data: [mes.receitas, mes.despesas],
+          backgroundColor: cores
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { beginAtZero: true }
         }
       }
-    }
+    });
   });
 }
+
