@@ -2,58 +2,38 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <title>Dashboard - HeleCash</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HeleCash</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-
-  <div class="w-full max-w-xl bg-white rounded-2xl shadow-lg p-6">
+  <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-6">
     <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">💰 HeleCash</h1>
-      <button id="logout-btn" class="text-sm text-white bg-red-500 hover:bg-red-600 px-4 py-1 rounded shadow">
-        Sair
-      </button>
+      <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard HeleCash</h1>
+      <button id="logout-btn" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
     </div>
 
-    <form id="transaction-form" class="space-y-4 mb-6">
-      <input type="text" id="description" placeholder="Descrição"
-        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        required />
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-green-100 text-green-800 p-4 rounded shadow">
+        <h2 class="text-lg font-semibold">Saldo Total</h2>
+        <p id="total-saldo" class="text-2xl font-bold">R$ 0.00</p>
+      </div>
+      <div class="bg-blue-100 text-blue-800 p-4 rounded shadow">
+        <h2 class="text-lg font-semibold">Receitas</h2>
+        <p id="total-receitas" class="text-2xl font-bold">R$ 0.00</p>
+      </div>
+      <div class="bg-red-100 text-red-800 p-4 rounded shadow">
+        <h2 class="text-lg font-semibold">Despesas</h2>
+        <p id="total-despesas" class="text-2xl font-bold">R$ 0.00</p>
+      </div>
+    </div>
 
-      <input type="number" id="amount" placeholder="Valor"
-        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        required />
-
-      <input type="date" id="date"
-        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        required />
-
-      <select id="category"
-        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        required>
-        <option value="">Selecione uma categoria</option>
-      </select>
-
-      <button type="submit"
-        class="w-full bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700 transition">
-        ➕ Adicionar
-      </button>
-    </form>
-
-    <h2 class="text-xl font-semibold text-gray-700 mb-4">Saldo atual:</h2>
-    <div class="text-2xl font-bold text-green-600 mb-6">R$ <span id="balance">0.00</span></div>
-
-    <ul id="transaction-list" class="space-y-2 text-gray-700 text-sm"></ul>
+    <canvas id="chart" height="100"></canvas>
   </div>
 
-  <script src="app.js"></script>
-
-  <script>
-    const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = 'login.html';
-    }
-  </script>
+  <script src="dashboard.js"></script>
 </body>
 </html>
