@@ -75,6 +75,7 @@ function renderPizzaCharts(despesasPorMes) {
     const labels = Object.keys(dados);
     const valores = Object.values(dados);
     const cores = labels.map(() => `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`);
+    console.log('Renderizando gráfico de pizza', dados, `#pizzaChart${index + 1}`);
 
     new Chart(ctx, {
       type: 'doughnut',
