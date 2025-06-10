@@ -31,11 +31,18 @@
         class="w-full bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700 transition">
         Entrar
       </button>
+      <button onclick="loginWithGoogle()">Login com Google</button>
+      
     </form>
 
     <p id="error" class="text-red-600 text-sm text-center"></p>
   </div>
 
   <script src="login.js"></script>
+  <script>
+  function loginWithGoogle() {
+    window.location.href = "/api/auth/google";
+  }
+</script>
 </body>
 </html>
