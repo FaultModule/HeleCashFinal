@@ -58,5 +58,18 @@
     </div>
   </div>
   <script src="dashboard.js"></script>
+  <script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+
+  if (token) {
+    localStorage.setItem('token', token);
+    window.history.replaceState({}, document.title, "/index.html");
+  }
+
+  if (!localStorage.getItem('token')) {
+    window.location.href = '/login.html';
+  }
+</script>
 </body>
 </html>

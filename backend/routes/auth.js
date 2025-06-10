@@ -9,10 +9,11 @@ const passport = require('passport');
   );
   
   router.get('/google/callback',
-    passport.authenticate('google', {
-      failureRedirect: '/login.html',
-      successRedirect: '/index.html' // ou dashboard.html
-    })
+  passport.authenticate('google', { failureRedirect: '/login.html' }),
+    (req, res) => {
+    const token = req.user.token;
+    res.redirect(`/index.html?token=${token}`);
+    }
   );
   
   router.get('/logout', (req, res) => {
