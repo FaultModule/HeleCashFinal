@@ -5,16 +5,15 @@ const db = require('../db');
 const passport = require('passport');
 
   router.get('/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
-  
-  router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login.html' }),
-    (req, res) => {
-    const token = req.user.token;
-    res.redirect(`/index.html?token=${token}`);
-    }
-  );
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+router.get('/google/callback',
+  passport.authenticate('google', {
+    failureRedirect: '/login.html',
+    successRedirect: '/index.html'
+  })
+);
   
   router.get('/logout', (req, res) => {
     req.logout(() => {
