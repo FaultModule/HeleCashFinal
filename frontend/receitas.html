@@ -68,7 +68,7 @@
             <td class="px-4 py-2">${item.descricao}</td>
             <td class="px-4 py-2">${item.categoria_nome}</td>
             <td class="px-4 py-2">${new Date(item.data).toLocaleDateString()}</td>
-            <td class="px-4 py-2 text-red-600 font-semibold">R$ ${Number(item.valor).toFixed(2)}</td>
+            <td class="px-4 py-2 text-green-600 font-semibold">R$ ${Number(item.valor).toFixed(2)}</td>
           `;
           list.appendChild(tr);
         });
