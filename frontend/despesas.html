@@ -7,13 +7,27 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
-  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow p-6">
+  <div class="max-w-5xl mx-auto bg-white rounded-xl shadow p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-red-700">💸 Despesas</h1>
       <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
     </div>
 
-    <ul id="despesas-list" class="space-y-4"></ul>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm text-left text-gray-700">
+        <thead class="bg-red-100 text-red-800">
+          <tr>
+            <th class="px-4 py-2">Descrição</th>
+            <th class="px-4 py-2">Categoria</th>
+            <th class="px-4 py-2">Data</th>
+            <th class="px-4 py-2">Valor</th>
+          </tr>
+        </thead>
+        <tbody id="despesas-list" class="divide-y divide-gray-200">
+          <!-- Conteúdo dinâmico -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script>
@@ -39,26 +53,23 @@
         });
 
         const data = await response.json();
-
         const despesas = data.filter(l => l.categoria_tipo === 'despesa');
         const list = document.getElementById('despesas-list');
 
         if (despesas.length === 0) {
-          list.innerHTML = '<p class="text-gray-500">Nenhuma despesa registrada.</p>';
+          list.innerHTML = `<tr><td colspan="4" class="text-center text-gray-500 py-4">Nenhuma despesa registrada.</td></tr>`;
           return;
         }
 
         despesas.forEach(item => {
-          const li = document.createElement('li');
-          li.className = "p-4 bg-red-50 border-l-4 border-red-400 rounded shadow";
-
-          li.innerHTML = `
-            <div class="font-semibold">${item.descricao}</div>
-            <div class="text-sm text-gray-600">${new Date(item.data).toLocaleDateString()} - ${item.categoria_nome}</div>
-            <div class="text-red-700 font-bold">R$ ${Number(item.valor).toFixed(2)}</div>
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="px-4 py-2">${item.descricao}</td>
+            <td class="px-4 py-2">${item.categoria_nome}</td>
+            <td class="px-4 py-2">${new Date(item.data).toLocaleDateString()}</td>
+            <td class="px-4 py-2 text-red-600 font-semibold">R$ ${Number(item.valor).toFixed(2)}</td>
           `;
-
-          list.appendChild(li);
+          list.appendChild(tr);
         });
       } catch (error) {
         console.error('Erro ao carregar despesas:', error);
