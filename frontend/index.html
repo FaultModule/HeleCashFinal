@@ -7,52 +7,55 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-6">
-    <nav class="bg-gray-800 text-white p-4 rounded-lg mb-4 flex justify-between items-center">
-      <div class="text-xl font-bold">HeleCash</div>
-      <div class="space-x-4">
-        <a href="index.html" class="hover:underline">Dashboard</a>
-        <a href="receitas.html" class="hover:underline">Receitas</a>
-        <a href="despesas.html" class="hover:underline">Despesas</a>
+<body class="bg-gray-100 min-h-screen p-4">
+  <nav class="bg-gray-800 text-white p-4 rounded-lg mb-4 flex justify-between items-center">
+        <div class="text-xl font-bold">HeleCash</div>
+        <div class="space-x-4">
+          <a href="index.html" class="hover:underline">Dashboard</a>
+          <a href="receitas.html" class="hover:underline">Receitas</a>
+          <a href="despesas.html" class="hover:underline">Despesas</a>
+        </div>
         <button id="logout-btn" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
-      </div>
-    </nav>
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard HeleCash</h1>
+      </nav>
+  <div class="bg-gray-100  flex items-center justify-center p-4">
+    <div class="w-full max-w-5xl bg-white rounded-2xl shadow-lg p-6">
       
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">📊 Dashboard HeleCash</h1>
+
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <div class="bg-green-100 text-green-800 p-4 rounded shadow">
+          <h2 class="text-lg font-semibold">Saldo Total</h2>
+          <p id="total-saldo" class="text-2xl font-bold">R$ 0.00</p>
+        </div>
+        <div class="bg-blue-100 text-blue-800 p-4 rounded shadow">
+          <h2 class="text-lg font-semibold">Receitas</h2>
+          <p id="total-receitas" class="text-2xl font-bold">R$ 0.00</p>
+        </div>
+        <div class="bg-red-100 text-red-800 p-4 rounded shadow">
+          <h2 class="text-lg font-semibold">Despesas</h2>
+          <p id="total-despesas" class="text-2xl font-bold">R$ 0.00</p>
+        </div>
+      </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <h3 id="pizzaLabel3" class="text-center font-semibold mb-2"></h3>
+            <canvas id="pizzaChart3" height="100"></canvas>
+          </div>
+          <div>
+            <h3 id="pizzaLabel2" class="text-center font-semibold mb-2"></h3>
+            <canvas id="pizzaChart2" height="100"></canvas>
+          </div>
+          <div>
+            <h3 id="pizzaLabel1" class="text-center font-semibold mb-2"></h3>
+            <canvas id="pizzaChart1" height="100"></canvas>
+          </div>
+        </div>
+
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-      <div class="bg-green-100 text-green-800 p-4 rounded shadow">
-        <h2 class="text-lg font-semibold">Saldo Total</h2>
-        <p id="total-saldo" class="text-2xl font-bold">R$ 0.00</p>
-      </div>
-      <div class="bg-blue-100 text-blue-800 p-4 rounded shadow">
-        <h2 class="text-lg font-semibold">Receitas</h2>
-        <p id="total-receitas" class="text-2xl font-bold">R$ 0.00</p>
-      </div>
-      <div class="bg-red-100 text-red-800 p-4 rounded shadow">
-        <h2 class="text-lg font-semibold">Despesas</h2>
-        <p id="total-despesas" class="text-2xl font-bold">R$ 0.00</p>
-      </div>
-    </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div>
-          <h3 id="pizzaLabel3" class="text-center font-semibold mb-2"></h3>
-          <canvas id="pizzaChart3" height="100"></canvas>
-        </div>
-        <div>
-          <h3 id="pizzaLabel2" class="text-center font-semibold mb-2"></h3>
-          <canvas id="pizzaChart2" height="100"></canvas>
-        </div>
-        <div>
-          <h3 id="pizzaLabel1" class="text-center font-semibold mb-2"></h3>
-          <canvas id="pizzaChart1" height="100"></canvas>
-        </div>
-      </div>
-
   </div>
   <script src="dashboard.js"></script>
 </body>
