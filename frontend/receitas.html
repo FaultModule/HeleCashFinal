@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Receitas - HeleCash</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-4xl mx-auto bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-green-700">📈 Receitas</h1>
+      <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
+    </div>
+
+    <ul id="receitas-list" class="space-y-4"></ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      });
+
+      fetchReceitas(token);
+    });
+
+    async function fetchReceitas(token) {
+      try {
+        const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const data = await response.json();
+
+        const receitas = data.filter(l => l.categoria_tipo === 'receita');
+        const list = document.getElementById('receitas-list');
+
+        if (receitas.length === 0) {
+          list.innerHTML = '<p class="text-gray-500">Nenhuma receita registrada.</p>';
+          return;
+        }
+
+        receitas.forEach(item => {
+          const li = document.createElement('li');
+          li.className = "p-4 bg-green-50 border-l-4 border-green-400 rounded shadow";
+
+          li.innerHTML = `
+            <div class="font-semibold">${item.descricao}</div>
+            <div class="text-sm text-gray-600">${new Date(item.data).toLocaleDateString()} - ${item.categoria_nome}</div>
+            <div class="text-green-700 font-bold">R$ ${Number(item.valor).toFixed(2)}</div>
+          `;
+
+          list.appendChild(li);
+        });
+      } catch (error) {
+        console.error('Erro ao carregar receitas:', error);
+      }
+    }
+  </script>
+</body>
+</html>
