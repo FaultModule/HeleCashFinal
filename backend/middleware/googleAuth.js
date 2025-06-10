@@ -5,7 +5,7 @@ const db = require('../db'); // sua conexão com o banco
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "https://helecashfinal.onrender.com/api/auth/callback/google/auth/google/callback"
+  callbackURL: "/auth/google/callback"
 },
 async (accessToken, refreshToken, profile, done) => {
   try {
