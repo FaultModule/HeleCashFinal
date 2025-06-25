@@ -24,10 +24,20 @@ passport.use(
           [email],
         );
 
+        const crypto = require('crypto');
+        const bcrypt = require('bcryptjs'); // npm i bcryptjs
+              
+        // ...
         if (rows.length === 0) {
+          // 1) gera string aleatória
+          const randomPwd = crypto.randomBytes(32).toString('hex');
+          // 2) faz hash
+          const hashedPwd = await bcrypt.hash(randomPwd, 12);
+        
           await db.query(
-            'INSERT INTO usuarios (nome, email, criado_em) VALUES ($1, $2, NOW())',
-            [nome, email],
+            `INSERT INTO usuarios (nome, email, senha, criado_em)
+             VALUES ($1, $2, $3, NOW())`,
+            [nome, email, hashedPwd],
           );
         }
 
