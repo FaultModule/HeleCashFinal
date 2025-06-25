@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Sessão e autenticação
+
 app.use(session({
   secret: 'sua_chave_secreta',
   resave: false,
@@ -18,7 +18,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Rotas
+
 const authRoutes = require('./routes/auth');
 const lancamentosRouter = require('./routes/lancamentos');
 const categoriasRoutes = require('./routes/categorias');
@@ -28,7 +28,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/lancamentos', lancamentosRouter);
 app.use('/api/categorias', categoriasRoutes);
 
-// Servir frontend
+
 const path = require('path');
 app.use(express.static(path.join(__dirname, '../frontend')));
 

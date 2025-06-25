@@ -1,37 +1,44 @@
+// server/auth/googleStrategy.js
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const passport = require('passport');
-const db = require('../db'); // sua conexão com o banco
+const db = require('../db');
 
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "/auth/google/callback"
-},
-async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails[0].value;
-    const nome = profile.displayName;
+// Se estiver no Render, a variável já vem com https://
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';  
+// → No Render defina BASE_URL=https://helecashfinal.onrender.com
 
-    let user = await db.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: `${BASE_URL}/auth/google/callback`,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const email = profile.emails?.[0]?.value;
+        const nome = profile.displayName;
 
-    if (user.rows.length === 0) {
-      await db.query(
-        'INSERT INTO usuarios (nome, email, criado_em) VALUES ($1, $2, NOW())',
-        [nome, email]
-      );
-    }
+        const { rows } = await db.query(
+          'SELECT id, nome, email FROM usuarios WHERE email = $1',
+          [email],
+        );
 
-    done(null, { email, nome }); // ou o ID do banco
-  } catch (err) {
-    done(err, null);
-  }
-}));
+        if (rows.length === 0) {
+          await db.query(
+            'INSERT INTO usuarios (nome, email, criado_em) VALUES ($1, $2, NOW())',
+            [nome, email],
+          );
+        }
 
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
+        // devolve apenas o essencial
+        done(null, { email, nome });
+      } catch (err) {
+        done(err);
+      }
+    },
+  ),
+);
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((user, done) => done(null, user));
