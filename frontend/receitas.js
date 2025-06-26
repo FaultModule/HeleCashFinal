@@ -2,7 +2,6 @@ const API   = 'https://helecashfinal.onrender.com/api';
 const token = localStorage.getItem('token');
 if (!token) location.href = 'login.html';
 
-/* ------------ elementos DOM ------------------------------------------ */
 const logoutBtn   = document.getElementById('logout-btn');
 const formReceita = document.getElementById('form-receita');
 const inputDesc   = document.getElementById('desp-desc');
@@ -16,7 +15,6 @@ const btnCloseIncome = document.getElementById('btn-close-income');
 const incomeModal    = document.getElementById('income-modal');
 const incomeForm     = document.getElementById('form-receita');
 
-// helpers de visibilidade
 function openIncomeModal()  {
   incomeModal.classList.remove('hidden');
 }
@@ -24,16 +22,13 @@ function closeIncomeModal() {
   incomeModal.classList.add('hidden');
 }
 
-// abrir modal
 btnOpenIncome.addEventListener('click', openIncomeModal);
 
-// fechar modal
 btnCloseIncome.addEventListener('click', closeIncomeModal);
 incomeModal.addEventListener('click', (e) => {
   if (e.target === incomeModal) closeIncomeModal();
 });
 
-// submit nova receita
 incomeForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -66,21 +61,16 @@ incomeForm.addEventListener('submit', async (e) => {
   }
 });
 
-/* ------------ logout -------------------------------------------------- */
 logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('token');
   location.href = 'login.html';
 });
 
-/* ------------ boot ---------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
   await carregarCategorias();
   await listarReceitas();
 });
 
-/* ---------------------------------------------------------------------- */
-/* Carregar categorias tipo 'receita'                                     */
-/* ---------------------------------------------------------------------- */
 async function carregarCategorias() {
   try {
     const res  = await fetch(`${API}/categorias`, {
@@ -100,9 +90,6 @@ async function carregarCategorias() {
   }
 }
 
-/* ---------------------------------------------------------------------- */
-/* Listar receitas existentes                                             */
-/* ---------------------------------------------------------------------- */
 async function listarReceitas() {
   tbody.innerHTML =
     '<tr><td colspan="5" class="text-center py-4">Carregando…</td></tr>';
@@ -145,9 +132,6 @@ async function listarReceitas() {
   }
 }
 
-/* ---------------------------------------------------------------------- */
-/* Remover receita                                                        */
-/* ---------------------------------------------------------------------- */
 async function removerReceita(id) {
   const confirmar = confirm("Tem certeza que deseja remover esta receita?");
   if (!confirmar) return;
@@ -167,5 +151,4 @@ async function removerReceita(id) {
   }
 }
 
-// exporta a função para o escopo global (para funcionar no onclick)
 window.removerReceita = removerReceita;

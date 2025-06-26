@@ -1,14 +1,9 @@
-// routes/lancamentos.js
 const express         = require('express');
 const db              = require('../db');
 const verificarToken  = require('../middleware/verificarToken');
 
 const router = express.Router();
 
-/* -------------------------------------------------------------------- */
-/* Listar todos os lançamentos do usuário                               */
-/* GET /api/lancamentos                                                 */
-/* -------------------------------------------------------------------- */
 router.get('/', verificarToken, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -31,10 +26,6 @@ router.get('/', verificarToken, async (req, res) => {
   }
 });
 
-/* -------------------------------------------------------------------- */
-/* Criar lançamento                                                     */
-/* POST /api/lancamentos                                                */
-/* -------------------------------------------------------------------- */
 router.post('/', verificarToken, async (req, res) => {
   const { descricao, valor, data, categoria_id } = req.body;
   const userId = req.user.id;
@@ -53,10 +44,6 @@ router.post('/', verificarToken, async (req, res) => {
   }
 });
 
-/* -------------------------------------------------------------------- */
-/* Atualizar lançamento                                                 */
-/* PUT /api/lancamentos/:id                                             */
-/* -------------------------------------------------------------------- */
 router.put('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   const { descricao, valor, data, categoria_id } = req.body;
@@ -82,10 +69,6 @@ router.put('/:id', verificarToken, async (req, res) => {
   }
 });
 
-/* -------------------------------------------------------------------- */
-/* Remover lançamento                                                   */
-/* DELETE /api/lancamentos/:id                                          */
-/* -------------------------------------------------------------------- */
 router.delete('/:id', verificarToken, async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;

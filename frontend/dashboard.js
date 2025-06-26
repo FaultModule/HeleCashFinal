@@ -95,13 +95,11 @@ async function fetchDashboardData(token) {
   }
 }
 
-/* ------------------------------------------------------------------------ */
-/* Chart.js renderers                                                       */
-let barCharts    = [];   // guardam instâncias para destruir no reload
+let barCharts    = [];
 let doughnutCharts = [];
 
 function renderChartMensal(meses) {
-  const cores = ['#10b981', '#ef4444'];           // verde / vermelho
+  const cores = ['#10b981', '#ef4444'];
 
   meses.forEach((m, idx) => {
     const ctx = document.getElementById(`barChart${idx + 1}`)?.getContext('2d');
@@ -110,7 +108,6 @@ function renderChartMensal(meses) {
 
     lbl.textContent = `Receitas vs Despesas — ${m.label}`;
 
-    // destrói gráfico antigo se existir
     barCharts[idx]?.destroy();
 
     barCharts[idx] = new Chart(ctx, {

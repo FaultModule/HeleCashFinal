@@ -8,15 +8,13 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
 <nav class="bg-gray-800 text-white p-4 rounded-lg my-6 flex justify-between items-center">
-  <!-- Logo/brand -->
   <span class="font-bold
                text-base    <!-- mobile -->
                sm:text-lg    <!-- ≥ 640 px -->
-               lg:text-xl">  <!-- ≥ 1024 px -->
+               lg:text-xl">
     HeleCash
   </span>
 
-  <!-- Links -->
   <div class="flex gap-3
               text-xs       <!-- mobile -->
               sm:text-sm    <!-- ≥ 640 px -->
@@ -27,7 +25,6 @@
     <a href="despesas.html" class="hover:underline">Despesas</a>
   </div>
 
-  <!-- Botão logout -->
   <button id="logout-btn"
           class="bg-red-500 rounded hover:bg-red-600 transition
                  px-3 py-1      text-xs        <!-- mobile -->
@@ -44,7 +41,7 @@
      class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
   <section id="box-receitas"
            class="w-full max-w-md bg-white rounded-2xl shadow p-6 space-y-4 relative">
-    <!-- botão fechar -->
+
     <button id="btn-close-income"
             class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
       &times;
@@ -69,7 +66,6 @@
 
       <select id="desp-cat"
               class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200" required>
-        <!-- opções via JS -->
       </select>
 
       <button type="submit"

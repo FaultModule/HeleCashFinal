@@ -11,7 +11,6 @@ function parseJwt(token) {
   }
 }
 
-
 function authHeaders(token) {
   return {
     'Content-Type': 'application/json',
@@ -36,7 +35,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await Promise.all([fetchCategories(token), fetchTransactions(token)]);
 });
-
 
 async function fetchCategories(token) {
   try {

@@ -1,4 +1,3 @@
-// backend/server.js
 require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 
 const express  = require('express');
@@ -10,12 +9,8 @@ require('./middleware/googleAuth');
 const path = require('path');
 const app  = express();
 
-/* -------------------------------------------------------------------------- */
-/* 1. Middlewares globais                                                     */
-/* -------------------------------------------------------------------------- */
 app.use(express.json());
 
-// CORS – libera localhost (dev) e domínio Render (prod)
 const WHITELIST = [
   'http://localhost:3000',
   'https://helecashfinal.onrender.com'
@@ -30,7 +25,6 @@ app.use(
   })
 );
 
-// Sessão (necessária para Passport quando usa Google OAuth)
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -43,13 +37,9 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-/* -------------------------------------------------------------------------- */
-/* 2. Rotas                                                                   */
-/* -------------------------------------------------------------------------- */
-// arquivos estáticos primeiro
+
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// rotas de API
 const authRouter        = require('./routes/auth');
 const lancamentosRouter = require('./routes/lancamentos');
 const categoriasRouter  = require('./routes/categorias');
@@ -58,14 +48,10 @@ app.use('/api/auth',        authRouter);
 app.use('/api/lancamentos', lancamentosRouter);
 app.use('/api/categorias',  categoriasRouter);
 
-// fallback SPA — por último, depois de static + API
 app.get(/^\/(?!api).*$/, (_, res) =>
   res.sendFile(path.join(__dirname, '../frontend', 'index.html'))
 );
 
-/* -------------------------------------------------------------------------- */
-/* 3. Boot                                                                    */
-/* -------------------------------------------------------------------------- */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () =>
   console.log(`🚀  Backend rodando em http://localhost:${PORT}`)

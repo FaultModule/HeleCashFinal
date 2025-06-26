@@ -2,7 +2,6 @@ const API   = 'https://helecashfinal.onrender.com/api';
 const token = localStorage.getItem('token');
 if (!token) location.href = 'login.html';
 
-/* ------------ elementos DOM ------------------------------------------ */
 const logoutBtn   = document.getElementById('logout-btn');
 const formDespesa = document.getElementById('form-despesa');
 const inputDesc   = document.getElementById('desp-desc');
@@ -16,7 +15,6 @@ const btnCloseExpense = document.getElementById('btn-close-expense');
 const expenseModal    = document.getElementById('expense-modal');
 const expenseForm     = document.getElementById('form-despesa');
 
-/* ------------ helpers de visibilidade ------------------------------- */
 function openExpenseModal()  {
   expenseModal.classList.remove('hidden');
 }
@@ -24,14 +22,12 @@ function closeExpenseModal() {
   expenseModal.classList.add('hidden');
 }
 
-/* ------------ eventos modal ------------------------------------------ */
 btnOpenExpense.addEventListener('click', openExpenseModal);
 btnCloseExpense.addEventListener('click', closeExpenseModal);
 expenseModal.addEventListener('click', (e) => {
   if (e.target === expenseModal) closeExpenseModal();
 });
 
-/* ------------ evento submit nova despesa ----------------------------- */
 formDespesa.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -64,19 +60,16 @@ formDespesa.addEventListener('submit', async (e) => {
   }
 });
 
-/* ------------ logout -------------------------------------------------- */
 logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('token');
   location.href = 'login.html';
 });
 
-/* ------------ boot (início) ------------------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
   await carregarCategorias();
   await listarDespesas();
 });
 
-/* ------------ carregar categorias tipo despesa ------------------------ */
 async function carregarCategorias() {
   try {
     const res  = await fetch(`${API}/categorias`, {
@@ -96,7 +89,6 @@ async function carregarCategorias() {
   }
 }
 
-/* ------------ listar despesas existentes ------------------------------ */
 async function listarDespesas() {
   tbody.innerHTML =
     '<tr><td colspan="5" class="text-center py-4">Carregando…</td></tr>';
@@ -139,7 +131,6 @@ async function listarDespesas() {
   }
 }
 
-/* ------------ remover despesa ----------------------------------------- */
 async function removerDespesa(id) {
   const confirmar = confirm("Tem certeza que deseja remover esta despesa?");
   if (!confirmar) return;
@@ -159,5 +150,4 @@ async function removerDespesa(id) {
   }
 }
 
-// torna a função acessível no escopo global (para o botão)
 window.removerDespesa = removerDespesa;
