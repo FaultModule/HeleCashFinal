@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - HeleCash</title>
+  <title>Login • HeleCash</title>
+
+  <!-- Tailwind CDN (modo produção: gere o CSS local) -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -12,37 +14,51 @@
     <h1 class="text-2xl font-bold text-center text-gray-800">🔐 Login no HeleCash</h1>
 
     <form id="loginForm" class="space-y-4">
-      <input
-        type="email"
-        id="email"
-        placeholder="E-mail"
-        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        required />
+      <label class="block">
+        <span class="sr-only">E-mail</span>
+        <input
+          type="email"
+          id="email"
+          placeholder="E-mail"
+          class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required>
+      </label>
 
-      <input
-        type="password"
-        id="senha"
-        placeholder="Senha"
-        class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        required />
+      <label class="block">
+        <span class="sr-only">Senha</span>
+        <input
+          type="password"
+          id="senha"
+          placeholder="Senha"
+          class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          required>
+      </label>
 
       <button
         type="submit"
         class="w-full bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700 transition">
         Entrar
       </button>
-      <button onclick="loginWithGoogle()">Login com Google</button>
-      
+
+      <!-- separador -->
+      <div class="flex items-center gap-2">
+        <hr class="flex-1 border-gray-300">
+        <span class="text-sm text-gray-500">ou</span>
+        <hr class="flex-1 border-gray-300">
+      </div>
+
+      <button
+        type="button"
+        id="googleBtn"
+        class="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 rounded hover:bg-gray-50 transition">
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="" class="w-5 h-5">
+        <span class="font-medium text-gray-700">Entrar com Google</span>
+      </button>
     </form>
 
     <p id="error" class="text-red-600 text-sm text-center"></p>
   </div>
 
   <script src="login.js"></script>
-  <script>
-  function loginWithGoogle() {
-    window.location.href = "https://helecashfinal.onrender.com/auth/google";
-  }
-</script>
 </body>
 </html>

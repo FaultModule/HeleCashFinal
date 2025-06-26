@@ -1,150 +1,166 @@
+/* dashboard.js ------------------------------------------------------------ */
+const API = 'https://helecashfinal.onrender.com/api';
+
+/* ------------------------------------------------------------------------ */
+/* Helpers                                                                  */
+const parseJwt = (t) => {
+  try {
+    const b64 = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(escape(atob(b64))));
+  } catch { return null; }
+};
+
+const authHeaders = (tok) => ({ Authorization: `Bearer ${tok}` });
+
+/* ------------------------------------------------------------------------ */
+/* Sessão & boot                                                            */
 document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('token');
-  if (!token) {
-    window.location.href = 'login.html';
-    return;
+  const payload = token && parseJwt(token);
+
+  if (!payload || Date.now() / 1000 > payload.exp) {
+    localStorage.removeItem('token');
+    return (window.location.href = 'login.html');
   }
 
   fetchDashboardData(token);
 
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    localStorage.removeItem('token');
-    window.location.href = 'login.html';
-  });
+  document
+    .getElementById('logout-btn')
+    .addEventListener('click', () => {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    });
 });
 
+/* ------------------------------------------------------------------------ */
+/* Dashboard                                                                */
 async function fetchDashboardData(token) {
   try {
-    const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    const res  = await fetch(`${API}/lancamentos`, { headers: authHeaders(token) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
 
-    const data = await response.json();
-
+    /* ----- totais globais ------------------------------------------------ */
     let totalReceitas = 0;
     let totalDespesas = 0;
 
-    const hoje = new Date();
-    const meses = [0, 1, 2].map(i => {
+    /* ----- últimos 3 meses ---------------------------------------------- */
+    const hoje   = new Date();
+    const meses  = [0, 1, 2].map(i => {
       const ref = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
       return {
         label: ref.toLocaleDateString('pt-BR', { month: 'long' }),
-        ano: ref.getFullYear(),
-        mes: ref.getMonth(),
+        ano:   ref.getFullYear(),
+        mes:   ref.getMonth(),
         receitas: 0,
-        despesas: 0
+        despesas: 0,
       };
     });
-    const despesasPorCategoriaMes = [ {}, {}, {} ];
-    data.forEach(item => {
-      const dataLanc = new Date(item.data);
-      const valor = Number(item.valor);
-      const tipo = item.categoria_tipo;
+    const despesasPorCategoriaMes = [{}, {}, {}];
 
-      
-      if (tipo === 'receita') totalReceitas += valor;
-      if (tipo === 'despesa') totalDespesas += valor;
+    /* ----- loop pelos lançamentos --------------------------------------- */
+    data.forEach((lan) => {
+      const dataLan = new Date(lan.data);
+      const valor   = Number(lan.valor);
+      const tipo    = lan.categoria_tipo;         // 'receita' | 'despesa'
 
-      
-      meses.forEach((m, i) => {
-    if (dataLanc.getFullYear() === m.ano && dataLanc.getMonth() === m.mes) {
-      const categoria = item.categoria_nome;
-      if (tipo === 'despesa') {
-      despesasPorCategoriaMes[i][categoria] = (despesasPorCategoriaMes[i][categoria] || 0) + valor;
-      }
-    }
+      /* totais globais */
+      if (tipo === 'receita')  totalReceitas  += valor;
+      if (tipo === 'despesa')  totalDespesas += valor;
+
+      /* por mês */
+      meses.forEach((m, idx) => {
+        if (dataLan.getFullYear() === m.ano && dataLan.getMonth() === m.mes) {
+          if (tipo === 'receita')  m.receitas += valor;
+          if (tipo === 'despesa')  m.despesas += valor;
+
+          if (tipo === 'despesa') {
+            const cat = lan.categoria_nome;
+            despesasPorCategoriaMes[idx][cat] =
+              (despesasPorCategoriaMes[idx][cat] || 0) + valor;
+          }
+        }
+      });
     });
-    });
 
-    document.getElementById('total-saldo').textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
+    /* ----- escreve totais na tela --------------------------------------- */
+    document.getElementById('total-saldo'   ).textContent =
+      `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
     document.getElementById('total-receitas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
     document.getElementById('total-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
 
-    
-    renderChartMensal(meses); // Gráfico de barras
-    renderPizzaCharts(despesasPorCategoriaMes, meses); // Gráfico de pizza
-  } catch (error) {
-    console.error('Erro ao carregar dados do dashboard:', error);
+    /* ----- gráficos ------------------------------------------------------ */
+    renderChartMensal(meses);
+    renderPizzaCharts(despesasPorCategoriaMes, meses);
+  } catch (err) {
+    console.error('Erro ao carregar dashboard:', err);
+    alert('Falha ao carregar dados. Faça login novamente.');
   }
 }
 
+/* ------------------------------------------------------------------------ */
+/* Chart.js renderers                                                       */
+let barCharts    = [];   // guardam instâncias para destruir no reload
+let doughnutCharts = [];
 
-function renderChartMensal(mensais) {
-  const cores = ['#10b981', '#ef4444'];
+function renderChartMensal(meses) {
+  const cores = ['#10b981', '#ef4444'];           // verde / vermelho
 
-  mensais.forEach((mes, index) => {
-    const canvasId = `barChart${index + 1}`;
-    const labelId = `barLabel${index + 1}`;
-    const canvas = document.getElementById(canvasId);
-    const labelEl = document.getElementById(labelId);
+  meses.forEach((m, idx) => {
+    const ctx = document.getElementById(`barChart${idx + 1}`)?.getContext('2d');
+    const lbl = document.getElementById(`barLabel${idx + 1}`);
+    if (!ctx || !lbl) return;
 
-    if (!canvas || !labelEl) return;
+    lbl.textContent = `Receitas vs Despesas — ${m.label}`;
 
-    labelEl.textContent = `Receitas vs Despesas - ${mes.label}`;
+    // destrói gráfico antigo se existir
+    barCharts[idx]?.destroy();
 
-    const ctx = canvas.getContext('2d');
-
-    new Chart(ctx, {
+    barCharts[idx] = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: ['Receitas', 'Despesas'],
-        datasets: [{
-          label: mes.label,
-          data: [mes.receitas, mes.despesas],
-          backgroundColor: cores
-        }]
+        datasets: [{ data: [m.receitas, m.despesas], backgroundColor: cores }],
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: false }
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } },
+      },
     });
   });
 }
-function renderPizzaCharts(despesasPorMes, meses) {
-  despesasPorMes.forEach((dados, index) => {
-    const ctx = document.getElementById(`pizzaChart${index + 1}`).getContext('2d');
-    const labelEl = document.getElementById(`pizzaLabel${index + 1}`);
 
-    const labels = Object.keys(dados);
-    const valores = Object.values(dados);
-    const cores = labels.map(() => `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`);
+function renderPizzaCharts(dadosMes, meses) {
+  dadosMes.forEach((mapa, idx) => {
+    const ctx = document.getElementById(`pizzaChart${idx + 1}`)?.getContext('2d');
+    const lbl = document.getElementById(`pizzaLabel${idx + 1}`);
+    if (!ctx || !lbl) return;
 
-    if (labelEl) {
-      labelEl.textContent = `Despesas por Categoria - ${meses[index].label}`;
-    }
+    const labels  = Object.keys(mapa);
+    const valores = Object.values(mapa);
+    const cores   = labels.map(
+      () => `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`,
+    );
 
-    new Chart(ctx, {
+    lbl.textContent = `Despesas por Categoria — ${meses[idx].label}`;
+
+    doughnutCharts[idx]?.destroy();
+
+    doughnutCharts[idx] = new Chart(ctx, {
       type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{
-          data: valores,
-          backgroundColor: cores
-        }]
-      },
+      data: { labels, datasets: [{ data: valores, backgroundColor: cores }] },
       options: {
         plugins: {
-          title: { display: false },
+          legend: { position: 'bottom' },
           tooltip: {
             callbacks: {
-              label: (context) => {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                return `${label}: R$ ${value.toFixed(2)}`;
-              }
-            }
+              label: ({ label, raw }) => `${label}: R$ ${Number(raw).toFixed(2)}`,
+            },
           },
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }
+        },
+      },
     });
   });
 }

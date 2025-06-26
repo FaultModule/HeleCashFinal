@@ -1,130 +1,142 @@
-document.addEventListener('DOMContentLoaded', () => {
-   const token = localStorage.getItem('token');
-    if (!token) {
+/* dashboard.js ----------------------------------------------------------- */
+/* 1. Configurações globais ---------------------------------------------- */
+const BASE_URL = 'https://helecashfinal.onrender.com/api';
+
+/* 2. Helpers ------------------------------------------------------------ */
+/**
+ * Decodifica o payload de um JWT sem validar assinatura
+ * (apenas para ler dados não sensíveis no front).
+ */
+function parseJwt(token) {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    // compatível com UTF-8
+    return JSON.parse(decodeURIComponent(escape(atob(base64))));
+  } catch (_) {
+    return null; // token mal-formado
+  }
+}
+
+/**
+ * Gera cabeçalhos padrão para requisições autenticadas.
+ */
+function authHeaders(token) {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+/* 3. Controle de sessão ------------------------------------------------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
     window.location.href = 'login.html';
     return;
   }
 
-  fetchCategories();
-  fetchTransactions();
+  // (opcional) redireciona se o token já expirou
+  const payload = parseJwt(token);
+  if (!payload || Date.now() / 1000 > payload.exp) {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  await Promise.all([fetchCategories(token), fetchTransactions(token)]);
 });
 
-  function parseJwt(token) {
-  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-  const decoded = JSON.parse(atob(base64));
-  return decoded;
+/* 4. Carregar categorias ------------------------------------------------- */
+async function fetchCategories(token) {
+  try {
+    const res = await fetch(`${BASE_URL}/categorias`, {
+      headers: authHeaders(token),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const categorias = await res.json();
+    const select = document.getElementById('category');
+    select.innerHTML = '<option value="" disabled selected>Selecione…</option>';
+
+    categorias.forEach(({ id, nome, tipo }) => {
+      const opt = new Option(`${nome} (${tipo})`, id);
+      select.add(opt);
+    });
+  } catch (err) {
+    console.error('Erro ao carregar categorias:', err);
+    alert('Não foi possível carregar categorias. Tente novamente.');
+  }
 }
 
-async function fetchCategories() {
-  const token = localStorage.getItem('token');
-  try {
-    const response = await fetch('https://helecashfinal.onrender.com/api/categorias', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    const categories = await response.json();
-
-    const select = document.getElementById('category');
-
-    categories.forEach(cat => {
-      const option = document.createElement('option');
-      option.value = cat.id;
-      option.textContent = `${cat.nome} (${cat.tipo})`;
-      select.appendChild(option);
-    });
-  } catch (error) {
-    console.error('Erro ao carregar categorias:', error);
-  }
-};
-
-
+/* 5. Submeter novo lançamento ------------------------------------------- */
 const form = document.getElementById('transaction-form');
-
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const token = localStorage.getItem('token');
   const payload = parseJwt(token);
-  const userId = payload.id;
+  if (!payload) return alert('Sessão inválida. Faça login de novo.');
 
-  const description = document.getElementById('description').value;
-  const amount = parseFloat(document.getElementById('amount').value);
-  const date = document.getElementById('date').value;
-  const categoryId = parseInt(document.getElementById('category').value);
+  const body = {
+    descricao: form.description.value.trim(),
+    valor: Number(form.amount.value),
+    data: form.date.value,
+    categoria_id: Number(form.category.value),
+    // Não envie usuario_id: o back-end já sabe pelo token!
+  };
 
-    try {
-    const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
+  try {
+    const res = await fetch(`${BASE_URL}/lancamentos`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        descricao: description,
-        valor: amount,
-        data: date,
-        categoria_id: categoryId,
-        usuario_id: userId
-      })
+      headers: authHeaders(token),
+      body: JSON.stringify(body),
     });
 
-    const result = await response.json();
-    alert(result.message || 'Lançamento adicionado com sucesso!');
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Erro desconhecido');
 
+    alert(json.message || 'Lançamento adicionado com sucesso!');
     form.reset();
-    fetchTransactions();
-
-  }  catch (error) {
-    console.error('Erro ao adicionar lançamento:', error);
-    alert('Erro ao adicionar lançamento');
+    await fetchTransactions(token);
+  } catch (err) {
+    console.error(err);
+    alert(`Erro ao adicionar lançamento: ${err.message}`);
   }
 });
 
-async function fetchTransactions() {
+/* 6. Listar lançamentos e saldo ----------------------------------------- */
+async function fetchTransactions(token) {
   try {
-    const token = localStorage.getItem('token');
-    
-    const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
-      headers: {
-      'Authorization': `Bearer ${token}`
-      }
+    const res = await fetch(`${BASE_URL}/lancamentos`, {
+      headers: authHeaders(token),
     });
-    
-    const data = await response.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-    const list = document.getElementById('transaction-list');
-    list.innerHTML = ''; 
+    const data = await res.json();
+    const ul = document.getElementById('transaction-list');
+    ul.innerHTML = '';
 
     let saldo = 0;
-
-    data.forEach(item => {
+    data.forEach((t) => {
       const li = document.createElement('li');
-      li.textContent = `${item.data.split('T')[0]} - ${item.descricao} - R$ ${Number(item.valor).toFixed(2)} [${item.categoria_nome}]`;
+      li.textContent = `${t.data.slice(0, 10)} — ${t.descricao} — R$ ${Number(
+        t.valor,
+      ).toFixed(2)} [${t.categoria_nome}]`;
 
-
-      
-      if (item.categoria_tipo === 'receita') {
-        saldo += Number(item.valor);
-      } else if (item.categoria_tipo === 'despesa') {
-        saldo -= Number(item.valor);
-      }
-
-      list.appendChild(li);
+      saldo += t.categoria_tipo === 'receita' ? Number(t.valor) : -Number(t.valor);
+      ul.appendChild(li);
     });
 
-    
     document.getElementById('balance').textContent = saldo.toFixed(2);
-
-  } catch (error) {
-    console.error('Erro ao carregar lançamentos:', error);
+  } catch (err) {
+    console.error('Erro ao carregar lançamentos:', err);
+    alert('Não foi possível carregar lançamentos.');
   }
-};
+}
 
-  const logoutBtn = document.getElementById('logout-btn');
-
-  logoutBtn.addEventListener('click', () => {
+/* 7. Logout ------------------------------------------------------------- */
+document.getElementById('logout-btn').addEventListener('click', () => {
   localStorage.removeItem('token');
   window.location.href = 'login.html';
 });

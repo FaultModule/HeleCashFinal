@@ -1,29 +1,39 @@
-document.getElementById('loginForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
+/* login.js --------------------------------------------------------------- */
+const API = 'https://helecashfinal.onrender.com/api';
 
-  const email = document.getElementById('email').value;
-  const senha = document.getElementById('senha').value;
+/* ----------------------------------------------------------------------- */
+/* 1. Submeter login com e-mail/senha                                      */
+const form  = document.getElementById('loginForm');
+const errEl = document.getElementById('error');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errEl.textContent = '';
+
+  const body = {
+    email:  form.email.value.trim(),
+    senha:  form.senha.value,
+  };
 
   try {
-    const response = await fetch('https://helecashfinal.onrender.com/api/auth/login', {
+    const res  = await fetch(`${API}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, senha })
+      body: JSON.stringify(body),
     });
+    const json = await res.json();
 
-    const data = await response.json();
+    if (!res.ok) throw new Error(json.error || 'Falha no login');
 
-    if (response.ok) {
-      
-      localStorage.setItem('token', data.token);
-      
-      window.location.href = 'index.html';
-    } else {
-      document.getElementById('error').textContent = data.error;
-    }
-
-  } catch (error) {
-    console.error('Erro ao tentar login:', error);
-    document.getElementById('error').textContent = 'Erro ao conectar com o servidor.';
+    localStorage.setItem('token', json.token);
+    window.location.href = 'index.html';              // dashboard
+  } catch (err) {
+    errEl.textContent = err.message;
   }
+});
+
+/* ----------------------------------------------------------------------- */
+/* 2. Login com Google                                                     */
+document.getElementById('googleBtn').addEventListener('click', () => {
+  window.location.href = `${API}/auth/google`;
 });
