@@ -110,7 +110,7 @@ async function listarReceitas() {
            <td class="px-4 py-2">${d.descricao}</td>
            <td class="px-4 py-2">${d.categoria_nome}</td>
            <td class="px-4 py-2">${new Date(d.data).toLocaleDateString()}</td>
-           <td class="px-4 py-2 text-red-600 font-semibold">-R$ ${Number(d.valor).toFixed(2)}</td>
+           <td class="px-4 py-2 text-green-600 font-semibold">R$ ${Number(d.valor).toFixed(2)}</td>
          </tr>`
       );
     });
