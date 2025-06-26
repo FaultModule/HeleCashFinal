@@ -1,54 +1,81 @@
-// server/auth/googleStrategy.js
+// backend/auth/googleStrategy.js
+const passport       = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const passport = require('passport');
-const db = require('../db');
+const crypto         = require('crypto');
+const bcrypt         = require('bcrypt');           // use o mesmo pacote do restante
+const db             = require('../db');
 
-// Se estiver no Render, a variável já vem com https://
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';  
-// → No Render defina BASE_URL=https://helecashfinal.onrender.com
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+// No Render defina no dashboard:  BASE_URL=https://helecashfinal.onrender.com
 
+/* -------------------------------------------------------------------------- */
+/* Strategy                                                                   */
+/* -------------------------------------------------------------------------- */
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientID:     process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${BASE_URL}/auth/google/callback`,
+      callbackURL:  `${BASE_URL}/api/auth/google/callback`,   // ⬅ combine com router
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails?.[0]?.value;
-        const nome = profile.displayName;
+        const nome  = profile.displayName || profile.username;
 
+        if (!email) {
+          return done(
+            new Error('Google OAuth não retornou e-mail verificado'),
+            false,
+          );
+        }
+
+        /* --------------------------- Encontrar ou criar -------------------------- */
         const { rows } = await db.query(
           'SELECT id, nome, email FROM usuarios WHERE email = $1',
           [email],
         );
 
-        const crypto = require('crypto');
-        const bcrypt = require('bcryptjs'); // npm i bcryptjs
-              
-        // ...
-        if (rows.length === 0) {
-          // 1) gera string aleatória
-          const randomPwd = crypto.randomBytes(32).toString('hex');
-          // 2) faz hash
-          const hashedPwd = await bcrypt.hash(randomPwd, 12);
-        
-          await db.query(
+        let usuario = rows[0];
+
+        if (!usuario) {
+          const randomPwd  = crypto.randomBytes(16).toString('hex'); // 32 chars
+          const hashedPwd  = await bcrypt.hash(randomPwd, 12);
+
+          const insert = await db.query(
             `INSERT INTO usuarios (nome, email, senha, criado_em)
-             VALUES ($1, $2, $3, NOW())`,
+             VALUES ($1, $2, $3, NOW())
+             RETURNING id, nome, email`,
             [nome, email, hashedPwd],
           );
+          usuario = insert.rows[0];
         }
 
-        // devolve apenas o essencial
-        done(null, { email, nome });
+        // Tudo certo — devolve apenas dados necessários
+        return done(null, usuario);
       } catch (err) {
-        done(err);
+        return done(err, false);
       }
     },
   ),
 );
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
+/* -------------------------------------------------------------------------- */
+/* Sessão (opcional)                                                          */
+/* -------------------------------------------------------------------------- */
+/*  ➜ Se você estiver usando JWT puro e `session: false` nas rotas protegidas,
+      pode remover serialize/deserialize e não usar express-session.
+*/
+passport.serializeUser((user, done) => done(null, user.id));
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const { rows } = await db.query(
+      'SELECT id, nome, email FROM usuarios WHERE id = $1',
+      [id],
+    );
+    return done(null, rows[0] || null);
+  } catch (err) {
+    return done(err, null);
+  }
+});

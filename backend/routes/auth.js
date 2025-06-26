@@ -1,85 +1,104 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
-const router = express.Router();
-const db = require('../db');
-const passport = require('passport');
+// routes/auth.js
+require('dotenv').config();              // carrega variáveis .env (JWT_SECRET, etc.)
 
-  router.get('/google',
+const express   = require('express');
+const bcrypt    = require('bcrypt');
+const jwt       = require('jsonwebtoken');
+const passport  = require('passport');
+const db        = require('../db');      // módulo que exporta o pool/cliente do pg
+
+const router = express.Router();
+
+/* -------------------------------------------------------------------------- */
+/* Google OAuth                                                               */
+/* -------------------------------------------------------------------------- */
+router.get(
+  '/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
-router.get('/google/callback',
+router.get(
+  '/google/callback',
   passport.authenticate('google', {
     failureRedirect: '/login.html',
-    successRedirect: '/index.html'
+    successRedirect: '/index.html',
+    session: false                     // não cria sessão se você usa JWT
   })
 );
-  
-  router.get('/logout', (req, res) => {
-    req.logout(() => {
-      res.redirect('/login.html');
-    });
+
+/* -------------------------------------------------------------------------- */
+/* Logout                                                                     */
+/* -------------------------------------------------------------------------- */
+router.get('/logout', (req, res, next) => {
+  req.logout(err => {
+    if (err) return next(err);
+    res.redirect('/login.html');
   });
-  
-  router.post('/register', async (req, res) => {
+});
+
+/* -------------------------------------------------------------------------- */
+/* Register                                                                   */
+/* -------------------------------------------------------------------------- */
+router.post('/register', async (req, res) => {
   const { nome, email, senha } = req.body;
 
   try {
-    
-    const userExists = await db.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    if (userExists.rows.length > 0) {
+    const { rows } = await db.query(
+      'SELECT 1 FROM usuarios WHERE email = $1',
+      [email]
+    );
+    if (rows.length) {
       return res.status(400).json({ error: 'Email já cadastrado' });
     }
 
-    
     const hash = await bcrypt.hash(senha, 10);
 
-    
     await db.query(
-    'INSERT INTO usuarios (nome, email, senha, criado_em) VALUES ($1, $2, $3, NOW())',
-    [nome, email, hash]
+      `INSERT INTO usuarios (nome, email, senha, criado_em)
+       VALUES ($1, $2, $3, NOW())`,
+      [nome, email, hash]
     );
 
-
     res.status(201).json({ message: 'Usuário registrado com sucesso' });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error('Erro em /register:', err);
     res.status(500).json({ error: 'Erro ao registrar usuário' });
   }
 });
 
-const jwt = require('jsonwebtoken');
-
-
+/* -------------------------------------------------------------------------- */
+/* Login                                                                      */
+/* -------------------------------------------------------------------------- */
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 
   try {
-    const result = await db.query('SELECT * FROM usuarios WHERE email = $1', [email]);
-    const user = result.rows[0];
-
-    if (!user) {
+    const { rows } = await db.query(
+      'SELECT id, nome, email, senha FROM usuarios WHERE email = $1',
+      [email]
+    );
+    if (!rows.length) {
       return res.status(401).json({ error: 'Usuário não encontrado' });
     }
 
-    const senhaValida = await bcrypt.compare(senha, user.senha);
+    const usuario = rows[0];
+    const senhaOk = await bcrypt.compare(senha, usuario.senha);
 
-    if (!senhaValida) {
+    if (!senhaOk) {
       return res.status(401).json({ error: 'Senha incorreta' });
     }
 
     const token = jwt.sign(
-      { id: user.id, nome: user.nome, email: user.email },
+      { id: usuario.id, nome: usuario.nome, email: usuario.email },
       process.env.JWT_SECRET,
       { expiresIn: '2h' }
     );
 
     res.json({ message: 'Login bem-sucedido', token });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error('Erro em /login:', err);
     res.status(500).json({ error: 'Erro ao fazer login' });
   }
 });
 
 module.exports = router;
-
