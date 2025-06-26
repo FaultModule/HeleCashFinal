@@ -14,13 +14,21 @@ const router = express.Router();
 /* -------------------------------------------------------------------------- */
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get('/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: '/login.html',
-    successRedirect: '/index.html',
-    // session: false   // habilite ou desabilite conforme sua escolha
-  })
-);
+router.get('/google/callback', (req, res, next) => {
+  passport.authenticate('google', { session: false }, (err, user) => {
+    if (err || !user) return res.redirect('/login.html');
+
+    // gera JWT
+    const token = jwt.sign(
+      { id: user.id, nome: user.nome, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    // redireciona com token
+    res.redirect(`/index.html?token=${token}`);
+  })(req, res, next);
+});
 
 /* -------------------------------------------------------------------------- */
 /* Logout                                                                     */
