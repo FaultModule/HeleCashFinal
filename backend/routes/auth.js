@@ -1,38 +1,34 @@
-// routes/auth.js
-require('dotenv').config();              // carrega variáveis .env (JWT_SECRET, etc.)
+
+require('dotenv').config();
 
 const express   = require('express');
 const bcrypt    = require('bcrypt');
 const jwt       = require('jsonwebtoken');
 const passport  = require('passport');
-const db        = require('../db');      // módulo que exporta o pool/cliente do pg
+const db        = require('../db');
 
 const router = express.Router();
 
-/* -------------------------------------------------------------------------- */
-/* Google OAuth                                                               */
-/* -------------------------------------------------------------------------- */
+
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', { session: false }, (err, user) => {
     if (err || !user) return res.redirect('/login.html');
 
-    // gera JWT
+
     const token = jwt.sign(
       { id: user.id, nome: user.nome, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: '2h' }
     );
 
-    // redireciona com token
+    
     res.redirect(`/index.html?token=${token}`);
   })(req, res, next);
 });
 
-/* -------------------------------------------------------------------------- */
-/* Logout                                                                     */
-/* -------------------------------------------------------------------------- */
+
 router.get('/logout', (req, res, next) => {
   req.logout(err => {
     if (err) return next(err);
@@ -40,9 +36,7 @@ router.get('/logout', (req, res, next) => {
   });
 });
 
-/* -------------------------------------------------------------------------- */
-/* Register                                                                   */
-/* -------------------------------------------------------------------------- */
+
 router.post('/register', async (req, res) => {
   const { nome, email, senha } = req.body;
 
@@ -70,9 +64,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-/* -------------------------------------------------------------------------- */
-/* Login                                                                      */
-/* -------------------------------------------------------------------------- */
+
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 

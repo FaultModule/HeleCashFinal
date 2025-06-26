@@ -1,8 +1,6 @@
-/* login.js --------------------------------------------------------------- */
 const API = 'https://helecashfinal.onrender.com/api';
 
-/* ----------------------------------------------------------------------- */
-/* 1. Submeter login com e-mail/senha                                      */
+
 const form  = document.getElementById('loginForm');
 const errEl = document.getElementById('error');
 
@@ -26,14 +24,12 @@ form.addEventListener('submit', async (e) => {
     if (!res.ok) throw new Error(json.error || 'Falha no login');
 
     localStorage.setItem('token', json.token);
-    window.location.href = 'index.html';              // dashboard
+    window.location.href = 'index.html';
   } catch (err) {
     errEl.textContent = err.message;
   }
 });
 
-/* ----------------------------------------------------------------------- */
-/* 2. Login com Google                                                     */
 document.getElementById('googleBtn').addEventListener('click', () => {
   window.location.href = `${API}/auth/google`;
 });

@@ -1,8 +1,6 @@
-/* dashboard.js ------------------------------------------------------------ */
 const API = 'https://helecashfinal.onrender.com/api';
 
-/* ------------------------------------------------------------------------ */
-/* Helpers                                                                  */
+
 const parseJwt = (t) => {
   try {
     const b64 = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -12,8 +10,7 @@ const parseJwt = (t) => {
 
 const authHeaders = (tok) => ({ Authorization: `Bearer ${tok}` });
 
-/* ------------------------------------------------------------------------ */
-/* Sessão & boot                                                            */
+
 document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('token');
   const payload = token && parseJwt(token);
@@ -33,19 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/* ------------------------------------------------------------------------ */
-/* Dashboard                                                                */
+
 async function fetchDashboardData(token) {
   try {
     const res  = await fetch(`${API}/lancamentos`, { headers: authHeaders(token) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    /* ----- totais globais ------------------------------------------------ */
+    
     let totalReceitas = 0;
     let totalDespesas = 0;
 
-    /* ----- últimos 3 meses ---------------------------------------------- */
+    
     const hoje   = new Date();
     const meses  = [0, 1, 2].map(i => {
       const ref = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
@@ -59,17 +55,17 @@ async function fetchDashboardData(token) {
     });
     const despesasPorCategoriaMes = [{}, {}, {}];
 
-    /* ----- loop pelos lançamentos --------------------------------------- */
+    
     data.forEach((lan) => {
       const dataLan = new Date(lan.data);
       const valor   = Number(lan.valor);
-      const tipo    = lan.categoria_tipo;         // 'receita' | 'despesa'
+      const tipo    = lan.categoria_tipo;
 
-      /* totais globais */
+      
       if (tipo === 'receita')  totalReceitas  += valor;
       if (tipo === 'despesa')  totalDespesas += valor;
 
-      /* por mês */
+     
       meses.forEach((m, idx) => {
         if (dataLan.getFullYear() === m.ano && dataLan.getMonth() === m.mes) {
           if (tipo === 'receita')  m.receitas += valor;
@@ -84,13 +80,13 @@ async function fetchDashboardData(token) {
       });
     });
 
-    /* ----- escreve totais na tela --------------------------------------- */
+   
     document.getElementById('total-saldo'   ).textContent =
       `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
     document.getElementById('total-receitas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
     document.getElementById('total-despesas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
 
-    /* ----- gráficos ------------------------------------------------------ */
+    
     renderChartMensal(meses);
     renderPizzaCharts(despesasPorCategoriaMes, meses);
   } catch (err) {

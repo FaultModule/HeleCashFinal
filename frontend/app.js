@@ -1,25 +1,17 @@
-/* dashboard.js ----------------------------------------------------------- */
-/* 1. Configurações globais ---------------------------------------------- */
 const BASE_URL = 'https://helecashfinal.onrender.com/api';
 
-/* 2. Helpers ------------------------------------------------------------ */
-/**
- * Decodifica o payload de um JWT sem validar assinatura
- * (apenas para ler dados não sensíveis no front).
- */
+
 function parseJwt(token) {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    // compatível com UTF-8
+   
     return JSON.parse(decodeURIComponent(escape(atob(base64))));
   } catch (_) {
-    return null; // token mal-formado
+    return null;
   }
 }
 
-/**
- * Gera cabeçalhos padrão para requisições autenticadas.
- */
+
 function authHeaders(token) {
   return {
     'Content-Type': 'application/json',
@@ -27,7 +19,6 @@ function authHeaders(token) {
   };
 }
 
-/* 3. Controle de sessão ------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
   const token = localStorage.getItem('token');
 
@@ -36,7 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  // (opcional) redireciona se o token já expirou
   const payload = parseJwt(token);
   if (!payload || Date.now() / 1000 > payload.exp) {
     localStorage.removeItem('token');
@@ -47,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await Promise.all([fetchCategories(token), fetchTransactions(token)]);
 });
 
-/* 4. Carregar categorias ------------------------------------------------- */
+
 async function fetchCategories(token) {
   try {
     const res = await fetch(`${BASE_URL}/categorias`, {
@@ -69,7 +59,7 @@ async function fetchCategories(token) {
   }
 }
 
-/* 5. Submeter novo lançamento ------------------------------------------- */
+
 const form = document.getElementById('transaction-form');
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -83,7 +73,7 @@ form.addEventListener('submit', async (e) => {
     valor: Number(form.amount.value),
     data: form.date.value,
     categoria_id: Number(form.category.value),
-    // Não envie usuario_id: o back-end já sabe pelo token!
+    
   };
 
   try {
@@ -105,7 +95,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-/* 6. Listar lançamentos e saldo ----------------------------------------- */
+
 async function fetchTransactions(token) {
   try {
     const res = await fetch(`${BASE_URL}/lancamentos`, {
@@ -135,7 +125,7 @@ async function fetchTransactions(token) {
   }
 }
 
-/* 7. Logout ------------------------------------------------------------- */
+
 document.getElementById('logout-btn').addEventListener('click', () => {
   localStorage.removeItem('token');
   window.location.href = 'login.html';
