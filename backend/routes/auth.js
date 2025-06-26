@@ -12,17 +12,13 @@ const router = express.Router();
 /* -------------------------------------------------------------------------- */
 /* Google OAuth                                                               */
 /* -------------------------------------------------------------------------- */
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get(
-  '/google/callback',
+router.get('/google/callback',
   passport.authenticate('google', {
     failureRedirect: '/login.html',
     successRedirect: '/index.html',
-    session: false                     // não cria sessão se você usa JWT
+    // session: false   // habilite ou desabilite conforme sua escolha
   })
 );
 
