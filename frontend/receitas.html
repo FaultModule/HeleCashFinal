@@ -6,52 +6,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
+<body class="flex bg-gray-100 min-h-screen p-4">
   <nav class="bg-gray-800 text-white p-4 rounded-lg mb-4 flex justify-between items-center">
-  <div class="text-xl font-bold">HeleCash</div>
-  <div class="space-x-4">
-    <a href="index.html" class="hover:underline">Dashboard</a>
-    <a href="receitas.html" class="hover:underline">Receitas</a>
-    <a href="despesas.html" class="hover:underline">Despesas</a>
-  </div>
-  <button id="logout-btn" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
-</nav>
+      <div class="text-xl font-bold">HeleCash</div>
+      <div class="space-x-4">
+        <a href="index.html" class="hover:underline">Dashboard</a>
+        <a href="receitas.html" class="hover:underline">Receitas</a>
+        <a href="despesas.html" class="hover:underline">Despesas</a>
+      </div>
+      <button id="logout-btn" class="text-sm bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Sair</button>
+    </nav>
     <section id="box-receitas"
          class="w-full max-w-md bg-white rounded-2xl shadow p-6 space-y-4">
-  <h2 class="text-xl font-semibold text-green-600 flex items-center gap-2">
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current">
-      <path d="M5 13l4 4L19 7"></path>
-    </svg>
-    Nova Receita
-  </h2>
-
-  <form id="form-receita" class="space-y-3">
-    <input id="rec-descricao" type="text" placeholder="Descrição"
-           class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
-           required>
-
-    <input id="rec-valor" type="number" step="0.01" placeholder="Valor (R$)"
-           class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
-           required>
-
-    <input id="rec-data" type="date"
-           class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
-           required>
-
-    <select id="rec-categoria"
-            class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
-            required>
-      <!-- opções preenchidas via JS -->
-    </select>
-
-    <button type="submit"
-            class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
-      Adicionar Receita
-    </button>
-  </form>
-
-  <p id="rec-erro" class="text-sm text-red-600"></p>
-</section>
+        <h2 class="text-xl font-semibold text-green-600 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current">
+            <path d="M5 13l4 4L19 7"></path>
+          </svg>
+          Nova Receita
+        </h2>
+      
+        <form id="form-receita" class="space-y-3">
+          <input id="rec-descricao" type="text" placeholder="Descrição"
+                 class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+                 required>
+        
+          <input id="rec-valor" type="number" step="0.01" placeholder="Valor (R$)"
+                 class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+                 required>
+        
+          <input id="rec-data" type="date"
+                 class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+                 required>
+        
+          <select id="rec-categoria"
+                  class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+                  required>
+            <!-- opções preenchidas via JS -->
+          </select>
+        
+          <button type="submit"
+                  class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
+            Adicionar Receita
+          </button>
+        </form>
+      
+        <p id="rec-erro" class="text-sm text-red-600"></p>
+      </section>
   <div class="max-w-5xl mx-auto bg-white rounded-xl shadow p-6">
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-green-700">💸 Receitas</h1>
