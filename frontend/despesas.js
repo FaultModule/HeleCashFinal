@@ -1,4 +1,3 @@
-/* frontend/despesas.js -------------------------------------------------- */
 const API   = 'https://helecashfinal.onrender.com/api';
 const token = localStorage.getItem('token');
 if (!token) location.href = 'login.html';
@@ -17,7 +16,7 @@ const btnCloseExpense = document.getElementById('btn-close-expense');
 const expenseModal    = document.getElementById('expense-modal');
 const expenseForm     = document.getElementById('form-despesa');
 
-// helpers de visibilidade
+/* ------------ helpers de visibilidade ------------------------------- */
 function openExpenseModal()  {
   expenseModal.classList.remove('hidden');
 }
@@ -25,84 +24,14 @@ function closeExpenseModal() {
   expenseModal.classList.add('hidden');
 }
 
-// abre ao clicar no botão
+/* ------------ eventos modal ------------------------------------------ */
 btnOpenExpense.addEventListener('click', openExpenseModal);
-
-// fecha no X ou clicando fora da box
 btnCloseExpense.addEventListener('click', closeExpenseModal);
 expenseModal.addEventListener('click', (e) => {
-  if (e.target === expenseModal) closeExpenseModal(); // clique no backdrop
+  if (e.target === expenseModal) closeExpenseModal();
 });
 
-// ---------------------------------------------
-// submit já existente → fecha ao concluir
-// ---------------------------------------------
-expenseForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  // ... corpo da requisição já implementado
-  // const body = { descricao: ..., valor: ..., data: ..., categoria_id: ... };
-
-  try {
-    const res  = await fetch(`${API}/lancamentos`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || 'Falha ao adicionar');
-
-    // sucesso → limpa, atualiza lista e fecha
-    expenseForm.reset();
-    erroBox.textContent = '';
-    await listarDespesas();     // ou a função que você já tem
-    closeExpenseModal();
-  } catch (err) {
-    erroBox.textContent = err.message;
-    console.error(err);
-  }
-});
-
-/* ------------ logout -------------------------------------------------- */
-logoutBtn.addEventListener('click', () => {
-  localStorage.removeItem('token');
-  location.href = 'login.html';
-});
-
-/* ------------ boot ---------------------------------------------------- */
-document.addEventListener('DOMContentLoaded', async () => {
-  await carregarCategorias();
-  await listarDespesas();
-});
-
-/* ---------------------------------------------------------------------- */
-/* Carregar categorias tipo 'despesa'                                     */
-/* ---------------------------------------------------------------------- */
-async function carregarCategorias() {
-  try {
-    const res  = await fetch(`${API}/categorias`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const cats = await res.json();
-
-    selectCat.innerHTML =
-      '<option value="" disabled selected>Selecione…</option>';
-
-    cats
-      .filter((c) => c.tipo === 'despesa')
-      .forEach((c) => selectCat.add(new Option(c.nome, c.id)));
-  } catch (err) {
-    erroBox.textContent = 'Erro ao carregar categorias.';
-    console.error(err);
-  }
-}
-
-/* ---------------------------------------------------------------------- */
-/* Submit nova despesa                                                    */
-/* ---------------------------------------------------------------------- */
+/* ------------ evento submit nova despesa ----------------------------- */
 formDespesa.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -125,25 +54,55 @@ formDespesa.addEventListener('submit', async (e) => {
     const json = await res.json();
     if (!res.ok) throw new Error(json.error || 'Falha ao adicionar');
 
-    /* sucesso */
     formDespesa.reset();
     erroBox.textContent = '';
     await listarDespesas();
+    closeExpenseModal();
   } catch (err) {
     erroBox.textContent = err.message;
     console.error(err);
   }
 });
 
-/* ---------------------------------------------------------------------- */
-/* Listar despesas existentes                                             */
-/* ---------------------------------------------------------------------- */
+/* ------------ logout -------------------------------------------------- */
+logoutBtn.addEventListener('click', () => {
+  localStorage.removeItem('token');
+  location.href = 'login.html';
+});
+
+/* ------------ boot (início) ------------------------------------------- */
+document.addEventListener('DOMContentLoaded', async () => {
+  await carregarCategorias();
+  await listarDespesas();
+});
+
+/* ------------ carregar categorias tipo despesa ------------------------ */
+async function carregarCategorias() {
+  try {
+    const res  = await fetch(`${API}/categorias`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const cats = await res.json();
+
+    selectCat.innerHTML =
+      '<option value="" disabled selected>Selecione…</option>';
+
+    cats
+      .filter((c) => c.tipo === 'despesa')
+      .forEach((c) => selectCat.add(new Option(c.nome, c.id)));
+  } catch (err) {
+    erroBox.textContent = 'Erro ao carregar categorias.';
+    console.error(err);
+  }
+}
+
+/* ------------ listar despesas existentes ------------------------------ */
 async function listarDespesas() {
   tbody.innerHTML =
-    '<tr><td colspan="4" class="text-center py-4">Carregando…</td></tr>';
+    '<tr><td colspan="5" class="text-center py-4">Carregando…</td></tr>';
 
   try {
-    const res  = await fetch(`${API}/lancamentos`, {
+    const res = await fetch(`${API}/lancamentos`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -151,7 +110,7 @@ async function listarDespesas() {
 
     if (!despesas.length) {
       tbody.innerHTML =
-        '<tr><td colspan="4" class="text-center text-gray-500 py-4">Nenhuma despesa registrada.</td></tr>';
+        '<tr><td colspan="5" class="text-center text-gray-500 py-4">Nenhuma despesa registrada.</td></tr>';
       return;
     }
 
@@ -160,16 +119,45 @@ async function listarDespesas() {
       tbody.insertAdjacentHTML(
         'beforeend',
         `<tr>
-           <td class="px-4 py-2">${d.descricao}</td>
-           <td class="px-4 py-2">${d.categoria_nome}</td>
-           <td class="px-4 py-2">${new Date(d.data).toLocaleDateString()}</td>
-           <td class="px-4 py-2 text-red-600 font-semibold">-R$ ${Number(d.valor).toFixed(2)}</td>
-         </tr>`
+          <td class="px-4 py-2">${d.descricao}</td>
+          <td class="px-4 py-2">${d.categoria_nome}</td>
+          <td class="px-4 py-2">${new Date(d.data).toLocaleDateString()}</td>
+          <td class="px-4 py-2 text-red-600 font-semibold">-R$ ${Number(d.valor).toFixed(2)}</td>
+          <td class="px-4 py-2">
+            <button onclick="removerDespesa('${d.id}')" 
+              class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
+              Remover
+            </button>
+          </td>
+        </tr>`
       );
     });
   } catch (err) {
     console.error(err);
     tbody.innerHTML =
-      '<tr><td colspan="4" class="text-center text-red-600 py-4">Erro ao carregar despesas.</td></tr>';
+      '<tr><td colspan="5" class="text-center text-red-600 py-4">Erro ao carregar despesas.</td></tr>';
   }
 }
+
+/* ------------ remover despesa ----------------------------------------- */
+async function removerDespesa(id) {
+  const confirmar = confirm("Tem certeza que deseja remover esta despesa?");
+  if (!confirmar) return;
+
+  try {
+    const res = await fetch(`${API}/lancamentos/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    if (!res.ok) throw new Error("Erro ao remover");
+
+    await listarDespesas();
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao remover despesa.");
+  }
+}
+
+// torna a função acessível no escopo global (para o botão)
+window.removerDespesa = removerDespesa;
