@@ -1,102 +1,116 @@
-/* receitas.js ----------------------------------------------------------- */
-const API = 'https://helecashfinal.onrender.com/api';
-
-/* ---------------- token / logout -------------------------------------- */
+/* frontend/receitas.js -------------------------------------------------- */
+const API   = 'https://helecashfinal.onrender.com/api';
 const token = localStorage.getItem('token');
 if (!token) location.href = 'login.html';
 
-document.getElementById('logout-btn').onclick = () => {
+/* ------------ elementos DOM ------------------------------------------ */
+const logoutBtn   = document.getElementById('logout-btn');
+const formDespesa = document.getElementById('form-receita');
+const inputDesc   = document.getElementById('desp-desc');
+const inputValor  = document.getElementById('desp-valor');
+const inputData   = document.getElementById('desp-data');
+const selectCat   = document.getElementById('desp-cat');
+const erroBox     = document.getElementById('desp-erro');
+const tbody       = document.getElementById('receitas-list');
+
+/* ------------ logout -------------------------------------------------- */
+logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('token');
   location.href = 'login.html';
-};
+});
 
-/* ---------------- boot ------------------------------------------------- */
+/* ------------ boot ---------------------------------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
-  await preencherCategorias();
+  await carregarCategorias();
   await listarReceitas();
 });
 
-/* ---------------- preencher <select> ---------------------------------- */
-async function preencherCategorias() {
-  const sel = document.getElementById('rec-categoria');
-  sel.innerHTML = '<option selected disabled>Carregando…</option>';
-
+/* ---------------------------------------------------------------------- */
+/* Carregar categorias tipo 'receita'                                     */
+/* ---------------------------------------------------------------------- */
+async function carregarCategorias() {
   try {
     const res  = await fetch(`${API}/categorias`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
     const cats = await res.json();
 
-    sel.innerHTML = '<option selected disabled>Selecione…</option>';
+    selectCat.innerHTML =
+      '<option value="" disabled selected>Selecione…</option>';
+
     cats
-      .filter(c => c.tipo === 'receita')
-      .forEach(c => sel.add(new Option(c.nome, c.id)));
-  } catch {
-    document.getElementById('rec-erro').textContent =
-      'Erro ao carregar categorias.';
+      .filter((c) => c.tipo === 'receita')
+      .forEach((c) => selectCat.add(new Option(c.nome, c.id)));
+  } catch (err) {
+    erroBox.textContent = 'Erro ao carregar categorias.';
+    console.error(err);
   }
 }
 
-/* ---------------- submit receita -------------------------------------- */
-document.getElementById('form-receita').addEventListener('submit', async e => {
+/* ---------------------------------------------------------------------- */
+/* Submit nova despesa                                                    */
+/* ---------------------------------------------------------------------- */
+formDespesa.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const body = {
-    descricao   : recDescricao.value.trim(),
-    valor       : Number(recValor.value),
-    data        : recData.value,
-    categoria_id: Number(recCategoria.value)
+    descricao: inputDesc.value.trim(),
+    valor: Number(inputValor.value),
+    data: inputData.value,
+    categoria_id: Number(selectCat.value),
   };
 
   try {
-    const res  = await fetch(`${API}/lancamentos`, {
-      method : 'POST',
+    const res = await fetch(`${API}/lancamentos`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization : `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
     const json = await res.json();
-    if (!res.ok) throw new Error(json.error || 'Falha desconhecida');
+    if (!res.ok) throw new Error(json.error || 'Falha ao adicionar');
 
     /* sucesso */
-    e.target.reset();
-    document.getElementById('rec-erro').textContent = '';
+    formDespesa.reset();
+    erroBox.textContent = '';
     await listarReceitas();
   } catch (err) {
-    document.getElementById('rec-erro').textContent = err.message;
+    erroBox.textContent = err.message;
+    console.error(err);
   }
 });
 
-/* ---------------- listar receitas ------------------------------------- */
+/* ---------------------------------------------------------------------- */
+/* Listar receitas existentes                                             */
+/* ---------------------------------------------------------------------- */
 async function listarReceitas() {
-  const tbody = document.getElementById('receitas-list');
   tbody.innerHTML =
     '<tr><td colspan="4" class="text-center py-4">Carregando…</td></tr>';
 
   try {
     const res  = await fetch(`${API}/lancamentos`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
-    const rec  = data.filter(l => l.categoria_tipo === 'receita');
+    const receitas = data.filter((l) => l.categoria_tipo === 'receita');
 
-    if (!rec.length) {
+    if (!receitas.length) {
       tbody.innerHTML =
-        '<tr><td colspan="4" class="text-center text-gray-500 py-4">Nenhuma receita registrada.</td></tr>';
+        '<tr><td colspan="4" class="text-center text-gray-500 py-4">Nenhuma despesa registrada.</td></tr>';
       return;
     }
 
     tbody.innerHTML = '';
-    rec.forEach(r => {
+    receitas.forEach((d) => {
       tbody.insertAdjacentHTML(
         'beforeend',
         `<tr>
-           <td class="px-4 py-2">${r.descricao}</td>
-           <td class="px-4 py-2">${r.categoria_nome}</td>
-           <td class="px-4 py-2">${new Date(r.data).toLocaleDateString()}</td>
-           <td class="px-4 py-2 text-green-600 font-semibold">R$ ${Number(r.valor).toFixed(2)}</td>
+           <td class="px-4 py-2">${d.descricao}</td>
+           <td class="px-4 py-2">${d.categoria_nome}</td>
+           <td class="px-4 py-2">${new Date(d.data).toLocaleDateString()}</td>
+           <td class="px-4 py-2 text-red-600 font-semibold">-R$ ${Number(d.valor).toFixed(2)}</td>
          </tr>`
       );
     });
