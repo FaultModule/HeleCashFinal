@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -8,6 +7,42 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
+  <section id="box-receitas"
+         class="w-full max-w-md bg-white rounded-2xl shadow p-6 space-y-4">
+  <h2 class="text-xl font-semibold text-green-600 flex items-center gap-2">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current">
+      <path d="M5 13l4 4L19 7"></path>
+    </svg>
+    Nova Receita
+  </h2>
+
+  <form id="form-receita" class="space-y-3">
+    <input id="rec-descricao" type="text" placeholder="Descrição"
+           class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+           required>
+
+    <input id="rec-valor" type="number" step="0.01" placeholder="Valor (R$)"
+           class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+           required>
+
+    <input id="rec-data" type="date"
+           class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+           required>
+
+    <select id="rec-categoria"
+            class="w-full border rounded px-3 py-2 focus:ring focus:ring-green-200"
+            required>
+      <!-- opções preenchidas via JS -->
+    </select>
+
+    <button type="submit"
+            class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">
+      Adicionar Receita
+    </button>
+  </form>
+
+  <p id="rec-erro" class="text-sm text-red-600"></p>
+</section>
   <nav class="bg-gray-800 text-white p-4 rounded-lg mb-4 flex justify-between items-center">
   <div class="text-xl font-bold">HeleCash</div>
   <div class="space-x-4">
@@ -21,6 +56,7 @@
     <div class="flex justify-between items-center mb-6">
       <h1 class="text-2xl font-bold text-green-700">💸 Receitas</h1>
     </div>
+    
 
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm text-left text-gray-700">
@@ -37,53 +73,6 @@
       </table>
     </div>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        window.location.href = 'login.html';
-        return;
-      }
-
-      document.getElementById('logout-btn').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        window.location.href = 'login.html';
-      });
-
-      fetchreceitas(token);
-    });
-
-    async function fetchreceitas(token) {
-      try {
-        const response = await fetch('https://helecashfinal.onrender.com/api/lancamentos', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        const data = await response.json();
-        const receitas = data.filter(l => l.categoria_tipo === 'receita');
-        const list = document.getElementById('receitas-list');
-
-        if (receitas.length === 0) {
-          list.innerHTML = `<tr><td colspan="4" class="text-center text-gray-500 py-4">Nenhuma despesa registrada.</td></tr>`;
-          return;
-        }
-
-        receitas.forEach(item => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td class="px-4 py-2">${item.descricao}</td>
-            <td class="px-4 py-2">${item.categoria_nome}</td>
-            <td class="px-4 py-2">${new Date(item.data).toLocaleDateString()}</td>
-            <td class="px-4 py-2 text-green-600 font-semibold">R$ ${Number(item.valor).toFixed(2)}</td>
-          `;
-          list.appendChild(tr);
-        });
-      } catch (error) {
-        console.error('Erro ao carregar despesas:', error);
-      }
-    }
-  </script>
 
   <script src="receitas.js"></script>
 </body>
