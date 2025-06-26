@@ -7,48 +7,81 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
-  <nav class="bg-gray-800 text-white p-4 rounded-lg my-6 flex justify-between items-center">
-    <div class="text-xl font-bold">HeleCash</div>
-    <div class="space-x-4">
-      <a href="/index.html"    class="hover:underline">Dashboard</a>
-      <a href="/receitas.html" class="hover:underline">Receitas</a>
-      <a href="/despesas.html" class="hover:underline">Despesas</a>
-    </div>
-    <button id="logout-btn"
-            class="text-sm bg-red-500 px-4 py-2 rounded hover:bg-red-600">Sair</button>
-  </nav>
-  <section id="box-despesas"
-           class="w-full max-w-md mx-auto mt-6 bg-white rounded-2xl shadow p-6 space-y-4">
-    <h2 class="text-xl font-semibold text-red-600 flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current">
-        <path d="M19 13H5v-2h14v2Z"></path>
-      </svg>
-      Nova Despesa
-    </h2>
+    <nav class="bg-gray-800 text-white p-4 rounded-lg my-6 flex justify-between items-center">
+  <!-- Logo/brand -->
+  <span class="font-bold
+               text-base    <!-- mobile -->
+               sm:text-lg    <!-- ≥ 640 px -->
+               lg:text-xl">  <!-- ≥ 1024 px -->
+    HeleCash
+  </span>
 
-    <form id="form-despesa" class="space-y-3">
-      <input id="desp-desc"  type="text"   placeholder="Descrição"
-             class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
+  <!-- Links -->
+  <div class="flex gap-3
+              text-xs       <!-- mobile -->
+              sm:text-sm    <!-- ≥ 640 px -->
+              lg:text-base  <!-- ≥ 1024 px -->
+              whitespace-nowrap">
+    <a href="index.html"    class="hover:underline">Dashboard</a>
+    <a href="receitas.html" class="hover:underline">Receitas</a>
+    <a href="despesas.html" class="hover:underline">Despesas</a>
+  </div>
 
-      <input id="desp-valor" type="number" step="0.01" placeholder="Valor (R$)"
-             class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
-
-      <input id="desp-data"  type="date"
-             class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
-
-      <select id="desp-cat"
-              class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
-        <!-- opções via JS -->
-      </select>
-
-      <button type="submit"
-              class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition">
-        Adicionar Despesa
+  <!-- Botão logout -->
+  <button id="logout-btn"
+          class="bg-red-500 rounded hover:bg-red-600 transition
+                 px-3 py-1      text-xs        <!-- mobile -->
+                 sm:px-4 sm:py-2 sm:text-sm    <!-- ≥ 640 px -->
+                 lg:text-base">
+    Sair
+  </button>
+</nav>
+      <button id="btn-open-expense"
+              class="block mx-auto bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+        Nova Despesa
       </button>
-    </form>
 
-    <p id="desp-erro" class="text-sm text-red-600"></p>
-  </section>
+  <div id="expense-modal"
+     class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+      <section id="box-despesas"
+               class="w-full max-w-md bg-white rounded-2xl shadow p-6 space-y-4 relative">
+        <!-- botão fechar -->
+        <button id="btn-close-expense"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+          &times;
+        </button>
+      
+        <h2 class="text-xl font-semibold text-red-600 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 fill-current">
+            <path d="M19 13H5v-2h14v2Z"></path>
+          </svg>
+          Nova Despesa
+        </h2>
+      
+        <form id="form-despesa" class="space-y-3">
+          <input id="desp-desc"  type="text"   placeholder="Descrição"
+                 class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
+        
+          <input id="desp-valor" type="number" step="0.01" placeholder="Valor (R$)"
+                 class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
+        
+          <input id="desp-data"  type="date"
+                 class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
+        
+          <select id="desp-cat"
+                  class="w-full border rounded px-3 py-2 focus:ring focus:ring-red-200" required>
+            <!-- opções via JS -->
+          </select>
+        
+          <button type="submit"
+                  class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition">
+            Adicionar Despesa
+          </button>
+        </form>
+      
+        <p id="desp-erro" class="text-sm text-red-600"></p>
+      </section>
+    </div>
 
 
   <div class="max-w-5xl mx-auto bg-white rounded-xl shadow p-6">

@@ -12,6 +12,59 @@ const inputData   = document.getElementById('desp-data');
 const selectCat   = document.getElementById('desp-cat');
 const erroBox     = document.getElementById('desp-erro');
 const tbody       = document.getElementById('despesas-list');
+const btnOpenExpense  = document.getElementById('btn-open-expense');
+const btnCloseExpense = document.getElementById('btn-close-expense');
+const expenseModal    = document.getElementById('expense-modal');
+const expenseForm     = document.getElementById('form-despesa');
+
+// helpers de visibilidade
+function openExpenseModal()  {
+  expenseModal.classList.remove('hidden');
+}
+function closeExpenseModal() {
+  expenseModal.classList.add('hidden');
+}
+
+// abre ao clicar no botão
+btnOpenExpense.addEventListener('click', openExpenseModal);
+
+// fecha no X ou clicando fora da box
+btnCloseExpense.addEventListener('click', closeExpenseModal);
+expenseModal.addEventListener('click', (e) => {
+  if (e.target === expenseModal) closeExpenseModal(); // clique no backdrop
+});
+
+// ---------------------------------------------
+// submit já existente → fecha ao concluir
+// ---------------------------------------------
+expenseForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // ... corpo da requisição já implementado
+  // const body = { descricao: ..., valor: ..., data: ..., categoria_id: ... };
+
+  try {
+    const res  = await fetch(`${API}/lancamentos`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Falha ao adicionar');
+
+    // sucesso → limpa, atualiza lista e fecha
+    expenseForm.reset();
+    erroBox.textContent = '';
+    await listarDespesas();     // ou a função que você já tem
+    closeExpenseModal();
+  } catch (err) {
+    erroBox.textContent = err.message;
+    console.error(err);
+  }
+});
 
 /* ------------ logout -------------------------------------------------- */
 logoutBtn.addEventListener('click', () => {

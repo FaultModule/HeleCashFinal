@@ -12,6 +12,43 @@ const inputData   = document.getElementById('desp-data');
 const selectCat   = document.getElementById('desp-cat');
 const erroBox     = document.getElementById('desp-erro');
 const tbody       = document.getElementById('receitas-list');
+const btnOpenIncome  = document.getElementById('btn-open-income');
+const btnCloseIncome = document.getElementById('btn-close-income');
+const incomeModal    = document.getElementById('income-modal');
+const incomeForm     = document.getElementById('form-receita');
+
+// helper para mostrar / esconder
+function openIncomeModal()  {
+  incomeModal.classList.remove('hidden');
+}
+function closeIncomeModal() {
+  incomeModal.classList.add('hidden');
+}
+
+// abre ao clicar no botão
+btnOpenIncome.addEventListener('click', openIncomeModal);
+
+// fecha no X ou clicando fora da box
+btnCloseIncome.addEventListener('click', closeIncomeModal);
+incomeModal.addEventListener('click', (e) => {
+  if (e.target === incomeModal) closeIncomeModal(); // clique no backdrop
+});
+
+// fecha depois de salvar (já havia submit listener)
+incomeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  /* ... POST existente para /lancamentos ... */
+
+  try {
+    /* se der certo */
+    incomeForm.reset();
+    await listarReceitas();
+    closeIncomeModal();
+  } catch (err) {
+    erroBox.textContent = err.message;
+  }
+});
 
 /* ------------ logout -------------------------------------------------- */
 logoutBtn.addEventListener('click', () => {
