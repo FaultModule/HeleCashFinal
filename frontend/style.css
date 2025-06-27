@@ -1,0 +1,7 @@
+body {
+  background-image: url('img/bg.jpg'); /* Sem barra no início */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+}
